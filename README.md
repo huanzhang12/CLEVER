@@ -193,7 +193,9 @@ models are available: "2-layer" (MLP), "normal" (7-layer CNN), "distilled"
 ReLU).  For ImageNet, available options are: "resnet_v2_50", "resnet_v2_101",
 "resnet_v2_152", "inception_v1", "inception_v2", "inception_v3",
 "inception_v4", "inception_resnet_v2", "vgg_16", "vgg_19", "mobilenet_v1_025",
-"mobilenet_v1_050", "mobilenet_v1_100".
+"mobilenet_v1_050", "mobilenet_v1_100", "alexnet", "densenet121_k32",
+"densenet169_k32", "densenet161_k48" and "nasnet_larget".
+A total of 18 ImageNet models have been built in so far.
 
 
 How to evaluate my own model?
@@ -206,4 +208,11 @@ ImageNet, a protobuf (.pb) model with frozen network parameters is expected,
 and new ImageNet models can be added into `setup_imagenet.py` by adding a new
 `AddModel()` entry, similar to other ImageNet models. Please read the comments 
 on `AddModel()` in `setup_imagenet.py` for more details.
+
+The following two links provide examples on how to prepare a frozen protobuf
+for ImageNet models:
+
+[Prepare DenseNet models](https://github.com/huanzhang12/tensorflow-densenet-models)
+
+[Prepare AlexNet model](https://github.com/huanzhang12/tensorflow-alexnet-model)
 

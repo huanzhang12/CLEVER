@@ -1,4 +1,4 @@
-## Modified by Huan Zhang for ResNet, Inception v1, v2, v4, VGG and MobileNet
+## Modified by Huan Zhang for ResNet, Inception v1, v2, v4, VGG, MobileNet, Densenet, Alexnet and NASnet
 ## Modified by Huan Zhang for the updated Inception-v3 model (inception_v3_2016_08_28.tar.gz)
 ## Modified by Nicholas Carlini to match model structure for attack code.
 ## Original copyright license follows.
@@ -89,45 +89,60 @@ def AddModel(name, url, model_filename, image_size, label_filename, input_tensor
   model_params[name] = param
 
 # pylint: disable=line-too-long
-AddModel('resnet_v2_50', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('resnet_v2_50', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_resnet_v2_50.pb', 224, 'labels.txt', 'input:0', 
          'resnet_v2_50/predictions/Reshape:0', 'resnet_v2_50/predictions/Reshape_1:0', 'resnet_v2_50/predictions/Shape:0')
-AddModel('resnet_v2_101', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('resnet_v2_101', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_resnet_v2_101.pb', 224, 'labels.txt', 'input:0', 
          'resnet_v2_101/predictions/Reshape:0', 'resnet_v2_101/predictions/Reshape_1:0', 'resnet_v2_101/predictions/Shape:0')
-AddModel('resnet_v2_152', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('resnet_v2_152', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_resnet_v2_152.pb', 224, 'labels.txt', 'input:0', 
          'resnet_v2_152/predictions/Reshape:0', 'resnet_v2_152/predictions/Reshape_1:0', 'resnet_v2_152/predictions/Shape:0')
-AddModel('inception_v1', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('inception_v1', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_inception_v1.pb', 224, 'labels.txt', 'input:0', 
          'InceptionV1/Logits/Predictions/Reshape:0', 'InceptionV1/Logits/Predictions/Reshape_1:0', 'InceptionV1/Logits/Predictions/Shape:0')
-AddModel('inception_v2', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('inception_v2', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_inception_v2.pb', 224, 'labels.txt', 'input:0', 
          'InceptionV2/Predictions/Reshape:0', 'InceptionV2/Predictions/Reshape_1:0', 'InceptionV2/Predictions/Shape:0')
-AddModel('inception_v3', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('inception_v3', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_inception_v3.pb', 299, 'labels.txt', 'input:0', 
          'InceptionV3/Predictions/Reshape:0', 'InceptionV3/Predictions/Softmax:0', 'InceptionV3/Predictions/Shape:0')
-AddModel('inception_v4', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('inception_v4', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_inception_v4.pb', 299, 'labels.txt', 'input:0', 
          'InceptionV4/Logits/Logits/BiasAdd:0', 'InceptionV4/Logits/Predictions:0', '')
-AddModel('inception_resnet_v2', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('inception_resnet_v2', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_inception_resnet_v2.pb', 299, 'labels.txt', 'input:0', 
          'InceptionResnetV2/Logits/Logits/BiasAdd:0', 'InceptionResnetV2/Logits/Predictions:0', '')
-AddModel('vgg_16', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('vgg_16', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_vgg_16.pb', 224, 'labels.txt', 'input:0', 
          'vgg_16/fc8/squeezed:0', 'vgg_16/fc8/squeezed:0', '')
-AddModel('vgg_19', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('vgg_19', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_vgg_19.pb', 224, 'labels.txt', 'input:0', 
          'vgg_19/fc8/squeezed:0', 'vgg_19/fc8/squeezed:0', '')
-AddModel('mobilenet_v1_025', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('mobilenet_v1_025', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_mobilenet_v1_025.pb', 224, 'labels.txt', 'input:0', 
          'MobilenetV1/Predictions/Reshape:0', 'MobilenetV1/Predictions/Reshape_1:0', 'MobilenetV1/Predictions/Shape:0')
-AddModel('mobilenet_v1_050', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('mobilenet_v1_050', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_mobilenet_v1_050.pb', 224, 'labels.txt', 'input:0', 
          'MobilenetV1/Predictions/Reshape:0', 'MobilenetV1/Predictions/Reshape_1:0', 'MobilenetV1/Predictions/Shape:0')
-AddModel('mobilenet_v1_100', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.0.tar.gz',
+AddModel('mobilenet_v1_100', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_mobilenet_v1_100.pb', 224, 'labels.txt', 'input:0', 
          'MobilenetV1/Predictions/Reshape:0', 'MobilenetV1/Predictions/Reshape_1:0', 'MobilenetV1/Predictions/Shape:0')
+AddModel('nasnet_large', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
+         'frozen_nasnet_large.pb', 331, 'labels.txt', 'input:0', 
+         'final_layer/FC/BiasAdd:0', 'final_layer/predictions:0', '')
+AddModel('densenet121_k32', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
+         'densenet121_k32_frozen.pb', 224, 'labels.txt', 'input:0', 
+         'densenet121/predictions/Reshape:0', 'densenet121/predictions/Reshape_1:0', 'densenet121/predictions/Shape:0')
+AddModel('densenet169_k32', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
+         'densenet169_k32_frozen.pb', 224, 'labels.txt', 'input:0', 
+         'densenet169/predictions/Reshape:0', 'densenet169/predictions/Reshape_1:0', 'densenet169/predictions/Shape:0')
+AddModel('densenet161_k48', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
+         'densenet161_k48_frozen.pb', 224, 'labels.txt', 'input:0', 
+         'densenet161/predictions/Reshape:0', 'densenet161/predictions/Reshape_1:0', 'densenet161/predictions/Shape:0')
+AddModel('alexnet', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
+         'alexnet_frozen.pb', 227, 'labels.txt', 'Placeholder:0', 
+         'fc8/fc8:0', 'Softmax:0', '')
 
 # pylint: enable=line-too-long
 
@@ -187,7 +202,6 @@ def create_graph(model_param):
     #  if "tensor_content" not in line:
     #    print(line)
     LOADED_GRAPH = graph_def
-    _ = tf.import_graph_def(graph_def, name='')
 
 
 class ImageNetModelPrediction:
@@ -221,6 +235,11 @@ class ImageNetModelPrediction:
     if 'vgg' in self.model_name:
       # VGG uses 0 - 255 image as input
       dat = (0.5 + dat) * 255.0
+    if 'alexnet' in self.model_name:
+      dat = (0.5 + dat) * 255.0
+      imagenet_mean = np.array([104., 117., 124.], dtype=np.float32)
+      dat -= imagenet_mean
+
     if dat.ndim == 3:
       scaled = dat.reshape((1,) + dat.shape)
     else:
@@ -248,6 +267,7 @@ class ImageNetModel:
     self.sess = sess
     self.use_softmax = use_softmax
     model_param = model_params[model_name]
+    maybe_download_and_extract(model_param)
 
     if not CREATED_GRAPH:
       create_graph(model_param)
@@ -257,7 +277,7 @@ class ImageNetModel:
     self.input_name = model_param['input']
     self.shape_name = model_param['shape']
     self.model_name = model_param['name']
-    self.num_labels = 1000 if 'vgg' in self.model_name else 1001
+    self.num_labels = 1000 if 'vgg' in self.model_name or 'densenet' in self.model_name or 'alexnet' in self.model_name else 1001
     self.image_size = model_param['size']
     self.use_softmax = use_softmax
     if create_prediction:
@@ -267,7 +287,12 @@ class ImageNetModel:
     if 'vgg' in self.model_name:
       # VGG uses 0 - 255 image as input
       img = (0.5 + img) * 255.0
-    if img.shape.as_list()[0] and self.shape_name:
+    if 'alexnet' in self.model_name:
+      dat = (0.5 + dat) * 255.0
+      imagenet_mean = np.array([104., 117., 124.], dtype=np.float32)
+      dat -= imagenet_mean
+
+    if img.shape.is_fully_defined() and img.shape.as_list()[0] and self.shape_name:
       # check if a shape has been specified explicitly
       shape = (int(img.shape[0]), self.num_labels)
       self.softmax_tensor = tf.import_graph_def(
@@ -310,7 +335,8 @@ def maybe_download_and_extract(model_param):
     print()
     statinfo = os.stat(filepath)
     print('Succesfully downloaded', filename, statinfo.st_size, 'bytes.')
-    tarfile.open(filepath, 'r:gz').extractall(dest_directory)
+    if os.path.splitext(filename)[1] != '.pb':
+      tarfile.open(filepath, 'r:gz').extractall(dest_directory)
 
 
 def main(_):
