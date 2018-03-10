@@ -381,8 +381,8 @@ def readimg(ff, img_size):
 
 class ImageNet:
   def __init__(self, img_size):
-    from multiprocessing import Pool
-    pool = Pool(8)
+    from multiprocessing import Pool, cpu_count
+    pool = Pool(cpu_count())
     file_list = sorted(os.listdir("../imagenetdata/imgs/"))
     random.shuffle(file_list)
     # for efficiency, we only load first 1000 images
@@ -398,8 +398,8 @@ class ImageNet:
     self.test_labels = np.zeros((len(test_labels), 1001))
     self.test_labels[np.arange(len(test_labels)), test_labels] = 1
 
-  
-
+    pool.close()
+    pool.join()
 
 if __name__ == '__main__':
   FLAGS = tf.app.flags.FLAGS
