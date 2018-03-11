@@ -26,7 +26,7 @@ packages are required:
 ```
 sudo apt-get install python3-pip python3-dev
 sudo pip3 install --upgrade pip
-sudo pip3 install six pillow scipy numpy pandas matplotlib h5py tensorflow-gpu
+sudo pip3 install six pillow scipy numpy pandas matplotlib h5py posix_ipc tensorflow-gpu
 ```
 
 Then clone this repository:
@@ -99,7 +99,7 @@ python3 clever.py lipschitz_mat/mnist_normal
 Run `python3 clever.py -h` for additional help information.
 
 
-### Step 3: How to intepret the score?
+### Step 3: How to interpret the score?
 
 At the end of the output of `clever.py`, you will see three `[STATS][L0]` lines similar to the following:
 
@@ -215,4 +215,22 @@ for ImageNet models:
 [Prepare DenseNet models](https://github.com/huanzhang12/tensorflow-densenet-models)
 
 [Prepare AlexNet model](https://github.com/huanzhang12/tensorflow-alexnet-model)
+
+Known Issues
+--------------------------------
+
+If you encounter the following error:
+
+```
+posix_ipc.ExistentialError: Shared memory with the specified name already exists
+```
+
+Please delete those residual files in `/dev/shm`
+
+```
+rm -f /dev/shm/all_inputs
+rm -f /dev/shm/input_example
+rm -f /dev/shm/randsphere
+rm -f /dev/shm/scale
+```
 
