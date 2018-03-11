@@ -158,13 +158,24 @@ class EstimateLipschitz(object):
             last_process_item = num - item_per_process * (self.n_processes - 1)
             total_item_size = num
         # array in shared memory storing results of all threads
-        tag = "randsphere"
         """
         shared_data = ShmemRawArray('f', total_item_size * dimension, tag)
         result_arr = np.ctypeslib.as_array(shared_data)
         result_arr = result_arr.reshape(total_item_size, dimension)
         """
-        result_arr = NpShmemArray(np.float32, (total_item_size, dimension), tag)
+        # create necessary shared array structures
+        inputs_0 = np.array(input_image)
+        result_arr = NpShmemArray(np.float32, (total_item_size, dimension), "randsphere")
+        # we have an extra batch_size to avoid overflow
+        # the scaling constant in [a,b]: scale the L2 norm of each sample (has originally norm ~1)
+        a = 1; b = 3; 
+        scale = NpShmemArray(np.float32, (num+batch_size), "scale")
+        scale[:] = (b-a)*np.random.rand(num+batch_size)+a; 
+        input_example = NpShmemArray(np.float32, inputs_0.shape, "input_example")
+        # this is a read-only array
+        input_example[:] = inputs_0
+        # all_inputs holds the perturbations for one batch or all samples
+        all_inputs = NpShmemArray(np.float32, (total_item_size,) + inputs_0.shape, "all_inputs")
         # prepare the argument list
         process_item_list = (self.n_processes - 1) * [item_per_process] + [last_process_item]
         offset_list = [0]
@@ -173,12 +184,11 @@ class EstimateLipschitz(object):
         print(self.n_processes, "threads launched with paramter", process_item_list, offset_list)
 
         # create multiple threads to generate samples
-        worker_func = partial(randsphere, n = dimension, total_size = total_item_size, arr_tag = tag, r = 1.0, X = None)
-        worker_args = list(zip(process_item_list, offset_list))
+        worker_func = partial(randsphere, n = dimension, input_shape = inputs_0.shape, total_size = total_item_size, scale_size = num+batch_size, r = 1.0, X = None)
+        worker_args = list(zip(process_item_list, offset_list, [0] * self.n_processes))
         sample_results = self.pool.map_async(worker_func, worker_args)
 
         # num: # of samples to be run, \leq samples.shape[0]
-        inputs_0 = np.array([input_image])
         
         # number of iterations
         Niters = niters;
@@ -211,8 +221,7 @@ class EstimateLipschitz(object):
             # idx_shuffle = np.random.permutation(num);
             
             # the scaling constant in [a,b]: scale the L2 norm of each sample (has originally norm ~1)
-            a = 1; b = 3; 
-            scale = (b-a)*np.random.rand(num)+a; 
+            scale[:] = (b-a)*np.random.rand(num+batch_size)+a; 
 
             # number of L's we have computed
             L_counter = 0
@@ -222,45 +231,50 @@ class EstimateLipschitz(object):
             if self.dataset != "imagenet":
                 # get samples for this iteration
                 sample_results.get()
-                samples = result_arr
                 # create multiple threads to generate samples for next batch
                 sample_results = self.pool.map_async(worker_func, worker_args)
 
+            overhead_time = 0.0
             for i in range(Nbatches):
+                overhead_start = time.time()
                 # for imagenet, generate random samples for this batch only
                 if self.dataset == "imagenet":
-                    numpy_start = time.time()
                     # get samples for this batch
-                    print("request", time.time())
                     sample_results.get()
-                    print("got", time.time())
-                    numpy_concat = time.time()
-                    # samples = np.concatenate(res_samples)
-                    samples = result_arr
                     # create multiple threads to generate samples for next batch
-                    print("go!", time.time())
+                    worker_args = zip(process_item_list, offset_list, [(i + 1) * batch_size] * self.n_processes)
                     sample_results = self.pool.map_async(worker_func, worker_args)
-                    numpy_end = time.time()
-                    print("numpy time:", numpy_concat - numpy_start, numpy_end - numpy_start)
 
+                """
                 # gather all indices
                 ii = list(range(i * batch_size, (i + 1) * batch_size))
                 # element wise product
                 if self.dataset == "imagenet":
-                    s = scale[ii][:, np.newaxis] * samples
+                    # s = scale[ii][:, np.newaxis] * samples
+                    s = scale[i * batch_size: (i + 1) * batch_size][:, np.newaxis] * samples
                 else:
-                    s = scale[ii][:, np.newaxis] * samples[ii, :]
+                    # s = scale[ii][:, np.newaxis] * samples[ii, :]
+                    s = scale[i * batch_size: (i + 1) * batch_size][:, np.newaxis] * samples[i * batch_size: (i + 1) * batch_size, :]
                 # prepare batched inputs
                 batch_inputs = np.repeat(inputs_0, batch_size, axis = 0)
                 batch_inputs += np.reshape(s, shape)
                 # clip the input to valid image range
+                """
+                if self.dataset == "imagenet":
+                    # we generate samples for each batch at a time
+                    batch_inputs = all_inputs
+                else:
+                    # we generate samples for all batches
+                    batch_inputs = all_inputs[i * batch_size: (i + 1) * batch_size]
                 np.clip(batch_inputs, -0.5, 0.5, out = batch_inputs)
+                overhead_time += time.time() - overhead_start
 
                 # run inference and get the gradient
                 perturbed_predicts, perturbed_grad_2_norm, perturbed_grad_1_norm, perturbed_grad_inf_norm = self.sess.run(
                         [self.output, self.grad_2_norm_op, self.grad_1_norm_op, self.grad_inf_norm_op], 
                         feed_dict = {self.img: batch_inputs, self.target_label: target_label, self.true_label: true_label})
                 
+                overhead_start = time.time()
                 if self.compute_slope:
                     # compute distance between consecutive samples: not use sequential samples 
                     s12_2_norm = np.linalg.norm(s[0:batch_size-1:2] - s[1:batch_size:2], axis = 1)
@@ -282,6 +296,7 @@ class EstimateLipschitz(object):
                 Gi[G_counter : G_counter + batch_size] = perturbed_grad_inf_norm
                 L_counter += (batch_size//2)
                 G_counter += batch_size
+                overhead_time += time.time() - overhead_start
             
             # get the per-iteration max gradient norm
             if self.compute_slope:
@@ -291,7 +306,7 @@ class EstimateLipschitz(object):
             G2_max[iters] = np.max(G2)
             G1_max[iters] = np.max(G1)
             Gi_max[iters] = np.max(Gi)
-            print('[STATS][L2] loop = {}, time = {:.5g}, L2 = {:.5g}, L1 = {:.5g}, Linf = {:.5g}, G2 = {:.5g}, G1 = {:.5g}, Ginf = {:.5g}'.format(iters, time.time() - search_begin_time, L2_max[iters], L1_max[iters], Li_max[iters], G2_max[iters], G1_max[iters], Gi_max[iters]))
+            print('[STATS][L2] loop = {}, time = {:.5g}, overhead = {:.5g}, L2 = {:.5g}, L1 = {:.5g}, Linf = {:.5g}, G2 = {:.5g}, G1 = {:.5g}, Ginf = {:.5g}'.format(iters, time.time() - search_begin_time, overhead_time, L2_max[iters], L1_max[iters], Li_max[iters], G2_max[iters], G1_max[iters], Gi_max[iters]))
             sys.stdout.flush()
             # reset per iteration L and G
             if self.compute_slope:
