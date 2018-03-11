@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import time
+from shmemarray import ShmemRawArray, NpShmemArray
 from scipy.special import gammainc
 
 
@@ -14,7 +16,16 @@ s2 = sum(X.^2,2);
 X = X.*repmat(r*(gammainc(s2/2,n/2).^(1/n))./sqrt(s2),1,n);
 """
 
-def randsphere(m, n, r, X = None):
+def randsphere(idx, n, r, arr_tag, total_size, X = None):
+    """
+    shared_data = ShmemRawArray('f', total_size * n, arr_tag, False)
+    result_arr = np.ctypeslib.as_array(shared_data)
+    result_arr = result_arr.reshape(total_size, n)
+    """
+    result_arr = NpShmemArray(np.float32, (total_size, n), arr_tag, False)
+    print("start!", time.time(), idx)
+    # m is the number of items, off is the offset
+    m, offset = idx
     if X is None:
         # if X is not specified, then generate X as random gaussian
         X = np.random.randn(m, n)
@@ -24,8 +35,9 @@ def randsphere(m, n, r, X = None):
         m = X.shape[0]
         n = X.shape[1]
     s2 = np.sum(X * X, axis = 1)
-    X = X * (np.tile(r*np.power(gammainc(n/2,s2/2), 1/n) / np.sqrt(s2), (n,1))).T
-    return X
+    result_arr[offset : offset + m] = X * (np.tile(r*np.power(gammainc(n/2,s2/2), 1/n) / np.sqrt(s2), (n,1))).T
+    print("done!", time.time())
+    return
 
 """
 Batched version (abondaned)

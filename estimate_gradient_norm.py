@@ -13,10 +13,12 @@ from __future__ import division
 
 import numpy as np
 import random
+import ctypes
 import time
 import sys
 
 from multiprocessing import Pool, current_process, cpu_count
+from shmemarray import ShmemRawArray, NpShmemArray
 from functools import partial
 from randsphere import randsphere
 
@@ -148,13 +150,32 @@ class EstimateLipschitz(object):
             # for imagenet, generate random samples for this batch only
             item_per_process = int(np.ceil(batch_size / float(self.n_processes)))
             last_process_item = batch_size - item_per_process * (self.n_processes - 1)
+            # array in shared memory storing results of all threads
+            total_item_size = batch_size
         else:
             # for cifar and mnist, generate random samples for this entire iteration
             item_per_process = int(np.ceil(num / float(self.n_processes)))
             last_process_item = num - item_per_process * (self.n_processes - 1)
+            total_item_size = num
+        # array in shared memory storing results of all threads
+        tag = "randsphere"
+        """
+        shared_data = ShmemRawArray('f', total_item_size * dimension, tag)
+        result_arr = np.ctypeslib.as_array(shared_data)
+        result_arr = result_arr.reshape(total_item_size, dimension)
+        """
+        result_arr = NpShmemArray(np.float32, (total_item_size, dimension), tag)
+        # prepare the argument list
         process_item_list = (self.n_processes - 1) * [item_per_process] + [last_process_item]
+        offset_list = [0]
+        for item in process_item_list[:-1]:
+            offset_list.append(offset_list[-1] + item)
+        print(self.n_processes, "threads launched with paramter", process_item_list, offset_list)
+
         # create multiple threads to generate samples
-        sample_results = self.pool.map_async(partial(randsphere, n = dimension, r = 1.0, X = None), process_item_list)
+        worker_func = partial(randsphere, n = dimension, total_size = total_item_size, arr_tag = tag, r = 1.0, X = None)
+        worker_args = list(zip(process_item_list, offset_list))
+        sample_results = self.pool.map_async(worker_func, worker_args)
 
         # num: # of samples to be run, \leq samples.shape[0]
         inputs_0 = np.array([input_image])
@@ -200,17 +221,27 @@ class EstimateLipschitz(object):
             # for cifar and mnist, generate random samples for this entire iteration
             if self.dataset != "imagenet":
                 # get samples for this iteration
-                samples = np.concatenate(sample_results.get())
+                sample_results.get()
+                samples = result_arr
                 # create multiple threads to generate samples for next batch
-                sample_results = self.pool.map_async(partial(randsphere, n = dimension, r = 1.0, X = None), process_item_list)
+                sample_results = self.pool.map_async(worker_func, worker_args)
 
             for i in range(Nbatches):
                 # for imagenet, generate random samples for this batch only
                 if self.dataset == "imagenet":
+                    numpy_start = time.time()
                     # get samples for this batch
-                    samples = np.concatenate(sample_results.get())
+                    print("request", time.time())
+                    sample_results.get()
+                    print("got", time.time())
+                    numpy_concat = time.time()
+                    # samples = np.concatenate(res_samples)
+                    samples = result_arr
                     # create multiple threads to generate samples for next batch
-                    sample_results = self.pool.map_async(partial(randsphere, n = dimension, r = 1.0, X = None), process_item_list)
+                    print("go!", time.time())
+                    sample_results = self.pool.map_async(worker_func, worker_args)
+                    numpy_end = time.time()
+                    print("numpy time:", numpy_concat - numpy_start, numpy_end - numpy_start)
 
                 # gather all indices
                 ii = list(range(i * batch_size, (i + 1) * batch_size))
