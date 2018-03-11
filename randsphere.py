@@ -16,17 +16,17 @@ s2 = sum(X.^2,2);
 X = X.*repmat(r*(gammainc(s2/2,n/2).^(1/n))./sqrt(s2),1,n);
 """
 
-def randsphere(idx, n, r, total_size, scale_size, input_shape, X = None):
+def randsphere(idx, n, r, total_size, scale_size, tag_prefix, input_shape, X = None):
     """
     shared_data = ShmemRawArray('f', total_size * n, arr_tag, False)
     result_arr = np.ctypeslib.as_array(shared_data)
     result_arr = result_arr.reshape(total_size, n)
     """
-    result_arr = NpShmemArray(np.float32, (total_size, n), "randsphere", False)
+    result_arr = NpShmemArray(np.float32, (total_size, n), tag_prefix + "randsphere", False)
     # for scale, we may want a different starting point for imagenet, which is scale_start
-    scale = NpShmemArray(np.float32, (scale_size, 1), "scale", False)
-    input_example = NpShmemArray(np.float32, input_shape, "input_example", False)
-    all_inputs = NpShmemArray(np.float32, (total_size,) + input_example.shape, "all_inputs", False)
+    scale = NpShmemArray(np.float32, (scale_size, 1), tag_prefix + "scale", False)
+    input_example = NpShmemArray(np.float32, input_shape, tag_prefix + "input_example", False)
+    all_inputs = NpShmemArray(np.float32, (total_size,) + input_example.shape, tag_prefix + "all_inputs", False)
     # m is the number of items, off is the offset
     m, offset, scale_start = idx
     if X is None:

@@ -16,6 +16,7 @@ import random
 import ctypes
 import time
 import sys
+import os
 
 from multiprocessing import Pool, current_process, cpu_count
 from shmemarray import ShmemRawArray, NpShmemArray
@@ -165,17 +166,18 @@ class EstimateLipschitz(object):
         """
         # create necessary shared array structures
         inputs_0 = np.array(input_image)
-        result_arr = NpShmemArray(np.float32, (total_item_size, dimension), "randsphere")
+        tag_prefix = str(os.getpid()) + "_"
+        result_arr = NpShmemArray(np.float32, (total_item_size, dimension), tag_prefix + "randsphere")
         # we have an extra batch_size to avoid overflow
         # the scaling constant in [a,b]: scale the L2 norm of each sample (has originally norm ~1)
         a = 1; b = 3; 
-        scale = NpShmemArray(np.float32, (num+batch_size), "scale")
+        scale = NpShmemArray(np.float32, (num+batch_size), tag_prefix + "scale")
         scale[:] = (b-a)*np.random.rand(num+batch_size)+a; 
-        input_example = NpShmemArray(np.float32, inputs_0.shape, "input_example")
+        input_example = NpShmemArray(np.float32, inputs_0.shape, tag_prefix + "input_example")
         # this is a read-only array
         input_example[:] = inputs_0
         # all_inputs holds the perturbations for one batch or all samples
-        all_inputs = NpShmemArray(np.float32, (total_item_size,) + inputs_0.shape, "all_inputs")
+        all_inputs = NpShmemArray(np.float32, (total_item_size,) + inputs_0.shape, tag_prefix + "all_inputs")
         # prepare the argument list
         process_item_list = (self.n_processes - 1) * [item_per_process] + [last_process_item]
         offset_list = [0]
@@ -184,7 +186,7 @@ class EstimateLipschitz(object):
         print(self.n_processes, "threads launched with paramter", process_item_list, offset_list)
 
         # create multiple threads to generate samples
-        worker_func = partial(randsphere, n = dimension, input_shape = inputs_0.shape, total_size = total_item_size, scale_size = num+batch_size, r = 1.0, X = None)
+        worker_func = partial(randsphere, n = dimension, input_shape = inputs_0.shape, total_size = total_item_size, scale_size = num+batch_size, tag_prefix = tag_prefix, r = 1.0, X = None)
         worker_args = list(zip(process_item_list, offset_list, [0] * self.n_processes))
         sample_results = self.pool.map_async(worker_func, worker_args)
 
