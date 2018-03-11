@@ -29,7 +29,7 @@ if __name__ == "__main__":
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-d", "--dataset", choices=["mnist", "cifar", "imagenet"], default="mnist", help = "choose dataset")
     parser.add_argument("-m", "--model_name", default="normal", 
-            help = "Select model. For MNIST and CIFAR, options are: 2-layer (MLP), normal (7-layer CNN), distilled (7-layer CNN with defensive distillation), brelu (7-layer CNN with Bounded ReLU). For ImageNet, available options are: resnet_v2_50, resnet_v2_101, resnet_v2_152, inception_v1, inception_v2, inception_v3, inception_v4, inception_resnet_v2, vgg_16, vgg_19, mobilenet_v1_025, mobilenet_v1_050, mobilenet_v1_100")
+            help = "Select model. For MNIST and CIFAR, options are: 2-layer (MLP), normal (7-layer CNN), distilled (7-layer CNN with defensive distillation), brelu (7-layer CNN with Bounded ReLU). For ImageNet, available options are: resnet_v2_50, resnet_v2_101, resnet_v2_152, inception_v1, inception_v2, inception_v3, inception_v4, inception_resnet_v2, vgg_16, vgg_19, mobilenet_v1_025, mobilenet_v1_050, mobilenet_v1_100, alexnet, nasnet_large, densenet121_k32, densenet169_k32, densenet161_k48")
     parser.add_argument("-N", "--Nsamps", type=int, default=1024, help = "number of samples per iterations")
     parser.add_argument("-i", "--Niters", type=int, default=500, help = "number of iterations. NITERS maximum gradient norms will be collected. A larger value will give a more accurate estimate")
     parser.add_argument("-n", "--numimg", type=int, default=1, help = "number of test images to load from dataset")
@@ -108,7 +108,8 @@ if __name__ == "__main__":
                                     random_and_least_likely = True,
                                     ids = ids, target_classes = target_classes, target_type = target_type,
                                     imagenet="imagenet" in dataset,
-                                    remove_background_class="imagenet" in dataset and "vgg" in model_name)
+                                    remove_background_class="imagenet" in dataset and 
+                                    ("vgg" in model_name or "densenet" in model_name or "alexnet" in model_name))
 
         timestart = time.time()
         print("got {} images".format(inputs.shape))

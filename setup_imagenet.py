@@ -288,9 +288,9 @@ class ImageNetModel:
       # VGG uses 0 - 255 image as input
       img = (0.5 + img) * 255.0
     if 'alexnet' in self.model_name:
-      dat = (0.5 + dat) * 255.0
+      img = (0.5 + img) * 255.0
       imagenet_mean = np.array([104., 117., 124.], dtype=np.float32)
-      dat -= imagenet_mean
+      img -= imagenet_mean
 
     if img.shape.is_fully_defined() and img.shape.as_list()[0] and self.shape_name:
       # check if a shape has been specified explicitly

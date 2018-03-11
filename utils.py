@@ -69,7 +69,7 @@ def generate_data(data, samples, targeted=True, random_and_least_likely = False,
                 if target_classes is None:
                     original_predict = np.squeeze(predictor(np.array([data.test_data[start+i]])))
                     num_classes = len(original_predict)
-                    predicted_label = np.argmax(original_predict)
+                    predicted_label = np.argmax(original_predict) + int(imagenet and remove_background_class)
                     least_likely_label = np.argmin(original_predict)
                     top2_label = np.argsort(original_predict)[-2]
                     start_class = 1 if (imagenet and not remove_background_class) else 0
