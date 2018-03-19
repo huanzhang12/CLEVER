@@ -86,9 +86,9 @@ if __name__ == "__main__":
         target_type = args['target_type']
 
     import tensorflow as tf
-    from setup_cifar import CIFAR, CIFARModel, TwoLayerCIFARModel
-    from setup_mnist import MNIST, MNISTModel, TwoLayerMNISTModel
-    from setup_imagenet import ImageNet, ImageNetModel
+    from setup_cifar import CIFAR
+    from setup_mnist import MNIST
+    from setup_imagenet import ImageNetModel
 
     tf.set_random_seed(seed)
     config = tf.ConfigProto()

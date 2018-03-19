@@ -51,6 +51,7 @@ class EstimateLipschitz(object):
         import tensorflow as tf
         from setup_cifar import CIFAR, CIFARModel, TwoLayerCIFARModel
         from setup_mnist import MNIST, MNISTModel, TwoLayerMNISTModel
+        from nlayer_model import NLayerModel
         from setup_imagenet import ImageNet, ImageNetModel
 
         # if set this to true, we will use the logit layer output instead of probability
@@ -72,7 +73,15 @@ class EstimateLipschitz(object):
                 elif model_name == "distilled":
                     model =  MNISTModel("models/mnist-distilled-100", self.sess, not output_logits)
                 else:
-                    raise(RuntimeError("incorrect model option"))
+                    # specify model parameters as N,M,opts
+                    model_params = model_name.split(",")
+                    if len(model_params) < 3:
+                        raise(RuntimeError("incorrect model option" + model_name))
+                    numlayer = int(model_params[0])
+                    nhidden = int(model_params[1])
+                    modelfile = "models/mnist_{}layer_relu_{}_{}".format(numlayer, nhidden, model_params[2])
+                    print("loading", modelfile)
+                    model = NLayerModel([nhidden] * (numlayer - 1), modelfile)
             elif dataset == "cifar":
                 self.batch_size = 1024
                 if model_name == "2-layer":
@@ -84,7 +93,15 @@ class EstimateLipschitz(object):
                 elif model_name == "distilled":
                     model = CIFARModel("models/cifar-distilled-100", self.sess, not output_logits)
                 else:
-                    raise(RuntimeError("incorrect model option"))
+                    # specify model parameters as N,M,opts
+                    model_params = model_name.split(",")
+                    if len(model_params) < 3:
+                        raise(RuntimeError("incorrect model option" + model_name))
+                    numlayer = int(model_params[0])
+                    nhidden = int(model_params[1])
+                    modelfile = "models/cifar_{}layer_relu_{}_{}".format(numlayer, nhidden, model_params[2])
+                    print("loading", modelfile)
+                    model = NLayerModel([nhidden] * (numlayer - 1), modelfile, image_size=32, image_channel=3)
             elif dataset == "imagenet":
                 self.batch_size = 32
                 model = ImageNetModel(self.sess, use_softmax = not output_logits, model_name = model_name, create_prediction = False)
@@ -170,7 +187,7 @@ class EstimateLipschitz(object):
         result_arr = NpShmemArray(np.float32, (total_item_size, dimension), tag_prefix + "randsphere")
         # we have an extra batch_size to avoid overflow
         # the scaling constant in [a,b]: scale the L2 norm of each sample (has originally norm ~1)
-        a = 1; b = 3; 
+        a = 0; b = 3; 
         scale = NpShmemArray(np.float32, (num+batch_size), tag_prefix + "scale")
         scale[:] = (b-a)*np.random.rand(num+batch_size)+a; 
         input_example = NpShmemArray(np.float32, inputs_0.shape, tag_prefix + "input_example")
