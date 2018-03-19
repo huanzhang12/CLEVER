@@ -235,10 +235,19 @@ class ImageNetModelPrediction:
     if 'vgg' in self.model_name:
       # VGG uses 0 - 255 image as input
       dat = (0.5 + dat) * 255.0
-    if 'alexnet' in self.model_name:
+      imagenet_mean = np.array([123.68, 116.78, 103.94], dtype=np.float32)
+      dat -= imagenet_mean
+    elif 'alexnet' in self.model_name:
+      if dat.ndim == 3:
+        dat = dat[:,:,::-1]
+      else:
+        dat = dat[:,:,:,::-1] # change RGB to BGR
       dat = (0.5 + dat) * 255.0
       imagenet_mean = np.array([104., 117., 124.], dtype=np.float32)
       dat -= imagenet_mean
+    else:
+      dat = dat * 2.0
+
 
     if dat.ndim == 3:
       scaled = dat.reshape((1,) + dat.shape)
@@ -287,10 +296,15 @@ class ImageNetModel:
     if 'vgg' in self.model_name:
       # VGG uses 0 - 255 image as input
       img = (0.5 + img) * 255.0
-    if 'alexnet' in self.model_name:
+      imagenet_mean = np.array([123.68, 116.78, 103.94], dtype=np.float32)
+      img -= imagenet_mean
+    elif 'alexnet' in self.model_name:
+      img = tf.reverse(img,axis=[-1])# change RGB to BGR
       img = (0.5 + img) * 255.0
       imagenet_mean = np.array([104., 117., 124.], dtype=np.float32)
       img -= imagenet_mean
+    else:
+      img = img * 2.0
 
     if img.shape.is_fully_defined() and img.shape.as_list()[0] and self.shape_name:
       # check if a shape has been specified explicitly
@@ -366,15 +380,58 @@ def main(_):
       print('%s (score = %.5f)' % (human_string, score))
 
 
+def keep_aspect_ratio_transform(img, img_size):
+    print("keep_aspect_ratio_transform")
+    print("img = ", img)
+    print("img.size = ", img.size)
+
+    s_0, s_1 = img.size
+    if s_0 < s_1:
+        ratio = (img_size / float(s_0))
+        size_1 = int((float(img.size[1]) * float(ratio)))
+        img = img.resize((img_size, size_1), PIL.Image.ANTIALIAS)
+    else:
+        ratio = (img_size / float(s_1))
+        size_0 = int((float(img.size[0]) * float(ratio)))
+        img = img.resize((size_0, img_size), PIL.Image.ANTIALIAS)
+
+    print("keep asp ratio resized img.size = ", img.size)
+
+    c_0 = img.size[0] // 2
+    c_1 = img.size[1] // 2
+
+    if img_size % 2 == 0:
+        w_left = h_top = img_size // 2
+        w_right = h_bottom = img_size // 2
+    else:
+        w_left = h_top = img_size // 2
+        w_right = h_bottom = img_size // 2 + 1
+
+    transformed_img = img.crop(
+        (
+            c_0 - w_left,
+            c_1 - h_top,
+            c_0 + w_right,
+            c_1 + h_bottom
+        )
+    )
+
+    return transformed_img
 def readimg(ff, img_size):
   f = "../imagenetdata/imgs/"+ff
-  img = scipy.misc.imread(f)
+  # img = scipy.misc.imread(f)
   # skip small images (image should be at least img_size X img_size)
 
   # if img.shape[0] < img_size or img.shape[1] < img_size:
   #   return None
 
-  img = np.array(scipy.misc.imresize(img,(img_size, img_size)),dtype=np.float32)/255.0-.5
+  # img = np.array(scipy.misc.imresize(img,(img_size, img_size)),dtype=np.float32)/255.0-.5
+  img = Image.open(f)
+  print(f)
+  transformed_img = keep_aspect_ratio_transform(img, img_size)
+  print("transformed_img.size = ", transformed_img.size)
+
+  img = np.array(transformed_img)/255.0-.5
   if img.shape != (img_size, img_size, 3):
     return None
   return [img, int(ff.split(".")[0])]
