@@ -88,7 +88,7 @@ if __name__ == "__main__":
     import tensorflow as tf
     from setup_cifar import CIFAR
     from setup_mnist import MNIST
-    from setup_imagenet import ImageNetModel
+    from setup_imagenet import ImageNet
 
     tf.set_random_seed(seed)
     config = tf.ConfigProto()
