@@ -51,6 +51,7 @@ import scipy.misc
 
 import numpy as np
 from six.moves import urllib
+import PIL
 import tensorflow as tf
 
 
@@ -381,9 +382,6 @@ def main(_):
 
 
 def keep_aspect_ratio_transform(img, img_size):
-    print("keep_aspect_ratio_transform")
-    print("img = ", img)
-    print("img.size = ", img.size)
 
     s_0, s_1 = img.size
     if s_0 < s_1:
@@ -394,8 +392,6 @@ def keep_aspect_ratio_transform(img, img_size):
         ratio = (img_size / float(s_1))
         size_0 = int((float(img.size[0]) * float(ratio)))
         img = img.resize((size_0, img_size), PIL.Image.ANTIALIAS)
-
-    print("keep asp ratio resized img.size = ", img.size)
 
     c_0 = img.size[0] // 2
     c_1 = img.size[1] // 2
@@ -426,10 +422,8 @@ def readimg(ff, img_size):
   #   return None
 
   # img = np.array(scipy.misc.imresize(img,(img_size, img_size)),dtype=np.float32)/255.0-.5
-  img = Image.open(f)
-  print(f)
+  img = PIL.Image.open(f)
   transformed_img = keep_aspect_ratio_transform(img, img_size)
-  print("transformed_img.size = ", transformed_img.size)
 
   img = np.array(transformed_img)/255.0-.5
   if img.shape != (img_size, img_size, 3):

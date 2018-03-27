@@ -115,7 +115,12 @@ def get_best_weibull_fit(sample, use_reg = False, shape_reg = 0.01):
     
     
     # get the paras of best pVal among c_init
-    max_pVal = max(fitted_paras['pVal'])
+    max_pVal = np.nanmax(fitted_paras['pVal'])
+    if np.isnan(max_pVal) or max_pVal < 0.001:
+        print("ill-conditioned samples. Using maximum sample value.")
+        # handle the ill conditioned case
+        return -1, -1, -max(sample), -1, -1, -1
+
     max_pVal_idx = fitted_paras['pVal'].index(max_pVal)
     
     c_init_best = c_init[max_pVal_idx]
