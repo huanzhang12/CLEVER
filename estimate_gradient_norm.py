@@ -164,17 +164,24 @@ class EstimateLipschitz(object):
         # print(grad_val)
         print(grad_2_norm_val, grad_1_norm_val, grad_inf_norm_val)
 
+        def div_work_to_cores(njobs, nprocs):
+            process_item_list = []
+            while njobs > 0:
+                process_item_list.append(int(np.ceil(njobs / float(nprocs))))
+                njobs -= process_item_list[-1]
+                nprocs -= 1
+            return process_item_list
+
         if self.dataset == "imagenet":
             # for imagenet, generate random samples for this batch only
-            item_per_process = int(np.ceil(batch_size / float(self.n_processes)))
-            last_process_item = batch_size - item_per_process * (self.n_processes - 1)
             # array in shared memory storing results of all threads
             total_item_size = batch_size
         else:
             # for cifar and mnist, generate random samples for this entire iteration
-            item_per_process = int(np.ceil(num / float(self.n_processes)))
-            last_process_item = num - item_per_process * (self.n_processes - 1)
             total_item_size = num
+        # divide the jobs evenly to all available threads
+        process_item_list = div_work_to_cores(total_item_size, self.n_processes)
+        self.n_processes = len(process_item_list)
         # array in shared memory storing results of all threads
         """
         shared_data = ShmemRawArray('f', total_item_size * dimension, tag)
@@ -196,7 +203,6 @@ class EstimateLipschitz(object):
         # all_inputs holds the perturbations for one batch or all samples
         all_inputs = NpShmemArray(np.float32, (total_item_size,) + inputs_0.shape, tag_prefix + "all_inputs")
         # prepare the argument list
-        process_item_list = (self.n_processes - 1) * [item_per_process] + [last_process_item]
         offset_list = [0]
         for item in process_item_list[:-1]:
             offset_list.append(offset_list[-1] + item)
