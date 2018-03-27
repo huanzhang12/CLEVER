@@ -60,6 +60,7 @@ def generate_data(data, samples, targeted=True, random_and_least_likely = False,
             target_classes = target_classes[start:start+samples]
         start = 0
     total = 0
+    n_correct = 0
     for i in ids:
         total += 1
         if targeted:
@@ -116,8 +117,11 @@ def generate_data(data, samples, targeted=True, random_and_least_likely = False,
                     seq = range(data.test_labels.shape[1])
                     information.extend(data.test_labels.shape[1] * ['seq'])
 
+            is_correct = np.argmax(data.test_labels[start+i]) == predicted_label
             print("[DATAGEN][L1] no = {}, true_id = {}, true_label = {}, predicted = {}, correct = {}, seq = {}, info = {}".format(total, start + i, 
-                np.argmax(data.test_labels[start+i]), predicted_label, np.argmax(data.test_labels[start+i]) == predicted_label, seq, [] if len(seq) == 0 else information[-len(seq):]))
+                np.argmax(data.test_labels[start+i]), predicted_label, is_correct, seq, [] if len(seq) == 0 else information[-len(seq):]))
+            if is_correct:
+                n_correct += 1
             for j in seq:
                 # skip the original image label
                 if (j == np.argmax(data.test_labels[start+i])):
@@ -151,6 +155,7 @@ def generate_data(data, samples, targeted=True, random_and_least_likely = False,
     true_labels = np.array(true_labels)
     true_ids = np.array(true_ids)
     print('labels generated')
+    print('top-1 accuracy:', n_correct / float(samples))
 
     return inputs, targets, true_labels, true_ids, information
 

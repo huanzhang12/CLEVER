@@ -374,7 +374,7 @@ def main(_):
     top_k = predictions.argsort()#[-FLAGS.num_top_predictions:][::-1]
     for node_id in top_k:
       score = predictions[node_id]
-      if 'vgg' in FLAGS.model_name:
+      if 'vgg' in FLAGS.model_name or 'densenet' in FLAGS.model_name or 'alexnet' in FLAGS.model_name:
         node_id += 1
       print('id',node_id)
       human_string = node_lookup.id_to_string(node_id)
@@ -427,18 +427,22 @@ def readimg(ff, img_size):
 
   img = np.array(transformed_img)/255.0-.5
   if img.shape != (img_size, img_size, 3):
+    # grayscale image
+    if img.shape == (img_size, img_size):
+      img = np.repeat(np.expand_dims(img, axis = 2), 3, axis = 2)
+      return [img, int(ff.split(".")[0])]
     return None
   return [img, int(ff.split(".")[0])]
 
 class ImageNet:
-  def __init__(self, img_size):
+  def __init__(self, img_size, load_total_imgs = 1000):
     from multiprocessing import Pool, cpu_count
     pool = Pool(cpu_count())
     file_list = sorted(os.listdir("../imagenetdata/imgs/"))
     random.shuffle(file_list)
     # for efficiency, we only load first 1000 images
-    # You can change here to load all images
-    short_file_list = file_list[:500]
+    # You can pass load_total_imgs to load all images
+    short_file_list = file_list[:load_total_imgs]
     r = pool.map(partial(readimg, img_size=img_size), short_file_list)
     print(short_file_list)
     print("Loaded imagenet", len(short_file_list), "of", len(file_list), "images")
