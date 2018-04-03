@@ -40,7 +40,11 @@ class EstimateLipschitz(object):
         else:
             self.n_processes = nthreads
         # set up random seed during initialization
-        self.pool = Pool(processes = self.n_processes, initializer = lambda s: np.random.seed(s + current_process()._identity[0]), initargs=(self.seed,))
+        def initializer(s):
+            np.random.seed(s + current_process()._identity[0])
+            # using only 1 OpenMP thread
+            os.environ['OMP_NUM_THREADS'] = "1"
+        self.pool = Pool(processes = self.n_processes, initializer = initializer, initargs=(self.seed,))
 
     def load_model(self, dataset = "mnist", model_name = "2-layer", model = None, batch_size = 0, compute_slope = False):
         """
