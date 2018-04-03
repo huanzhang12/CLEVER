@@ -21,7 +21,7 @@ import os
 from multiprocessing import Pool, current_process, cpu_count
 from shmemarray import ShmemRawArray, NpShmemArray
 from functools import partial
-from randsphere import randsphere
+from randsphere import randsphere_l2, randsphere_li
 
      
 class EstimateLipschitz(object):
@@ -135,7 +135,7 @@ class EstimateLipschitz(object):
 
         return self.img, self.output
 
-    def _estimate_Lipschitz_multiplerun(self, num, niters, input_image, target_label, true_label):
+    def _estimate_Lipschitz_multiplerun(self, num, niters, input_image, target_label, true_label, sample_norm = "l2"):
         """
         num: number of samples per iteration
         niters: number of iterations
@@ -171,6 +171,7 @@ class EstimateLipschitz(object):
                 njobs -= process_item_list[-1]
                 nprocs -= 1
             return process_item_list
+        # n is the dimension
 
         if self.dataset == "imagenet":
             # for imagenet, generate random samples for this batch only
@@ -182,19 +183,23 @@ class EstimateLipschitz(object):
         # divide the jobs evenly to all available threads
         process_item_list = div_work_to_cores(total_item_size, self.n_processes)
         self.n_processes = len(process_item_list)
-        # array in shared memory storing results of all threads
-        """
-        shared_data = ShmemRawArray('f', total_item_size * dimension, tag)
-        result_arr = np.ctypeslib.as_array(shared_data)
-        result_arr = result_arr.reshape(total_item_size, dimension)
-        """
+        # select random sample generation function
+        if sample_norm == "l2":
+            # the scaling constant in [a,b]: scale the L2 norm of each sample (has originally norm ~1)
+            a = 0; b = 3; 
+            randsphere = randsphere_l2
+        elif sample_norm == "li":
+            # for Linf we don't need the scaling
+            a = 0.1; b = 0.1; 
+            randsphere = randsphere_li
+        else:
+            raise RuntimeError("Unknown sample_norm " + sample_norm)
+        print('Using sphere', randsphere)
         # create necessary shared array structures
         inputs_0 = np.array(input_image)
         tag_prefix = str(os.getpid()) + "_"
         result_arr = NpShmemArray(np.float32, (total_item_size, dimension), tag_prefix + "randsphere")
         # we have an extra batch_size to avoid overflow
-        # the scaling constant in [a,b]: scale the L2 norm of each sample (has originally norm ~1)
-        a = 0; b = 3; 
         scale = NpShmemArray(np.float32, (num+batch_size), tag_prefix + "scale")
         scale[:] = (b-a)*np.random.rand(num+batch_size)+a; 
         input_example = NpShmemArray(np.float32, inputs_0.shape, tag_prefix + "input_example")
@@ -202,6 +207,8 @@ class EstimateLipschitz(object):
         input_example[:] = inputs_0
         # all_inputs holds the perturbations for one batch or all samples
         all_inputs = NpShmemArray(np.float32, (total_item_size,) + inputs_0.shape, tag_prefix + "all_inputs")
+        # holds the results copied from all_inputs
+        clipped_all_inputs = np.empty(dtype=np.float32, shape = (total_item_size,) + inputs_0.shape)
         # prepare the argument list
         offset_list = [0]
         for item in process_item_list[:-1]:
@@ -256,6 +263,8 @@ class EstimateLipschitz(object):
             if self.dataset != "imagenet":
                 # get samples for this iteration
                 sample_results.get()
+                # copy the results to a buffer and do clipping
+                np.clip(all_inputs, -0.5, 0.5, out = clipped_all_inputs)
                 # create multiple threads to generate samples for next batch
                 sample_results = self.pool.map_async(worker_func, worker_args)
 
@@ -266,32 +275,22 @@ class EstimateLipschitz(object):
                 if self.dataset == "imagenet":
                     # get samples for this batch
                     sample_results.get()
+                    # copy the results to a buffer and do clipping
+                    np.clip(all_inputs, -0.5, 0.5, out = clipped_all_inputs)
                     # create multiple threads to generate samples for next batch
                     worker_args = zip(process_item_list, offset_list, [(i + 1) * batch_size] * self.n_processes)
                     sample_results = self.pool.map_async(worker_func, worker_args)
 
-                """
-                # gather all indices
-                ii = list(range(i * batch_size, (i + 1) * batch_size))
-                # element wise product
-                if self.dataset == "imagenet":
-                    # s = scale[ii][:, np.newaxis] * samples
-                    s = scale[i * batch_size: (i + 1) * batch_size][:, np.newaxis] * samples
-                else:
-                    # s = scale[ii][:, np.newaxis] * samples[ii, :]
-                    s = scale[i * batch_size: (i + 1) * batch_size][:, np.newaxis] * samples[i * batch_size: (i + 1) * batch_size, :]
-                # prepare batched inputs
-                batch_inputs = np.repeat(inputs_0, batch_size, axis = 0)
-                batch_inputs += np.reshape(s, shape)
-                # clip the input to valid image range
-                """
                 if self.dataset == "imagenet":
                     # we generate samples for each batch at a time
-                    batch_inputs = all_inputs
+                    batch_inputs = clipped_all_inputs
                 else:
                     # we generate samples for all batches
-                    batch_inputs = all_inputs[i * batch_size: (i + 1) * batch_size]
-                np.clip(batch_inputs, -0.5, 0.5, out = batch_inputs)
+                    batch_inputs = clipped_all_inputs[i * batch_size: (i + 1) * batch_size]
+                # print(result_arr.shape, result_arr)
+                # print('------------------------')
+                # print(batch_inputs.shape, batch_inputs.reshape(result_arr.shape))
+                # print('------------------------')
                 overhead_time += time.time() - overhead_start
 
                 # run inference and get the gradient
@@ -360,8 +359,8 @@ class EstimateLipschitz(object):
         # terminate the pool
         self.pool.terminate()
 
-    def estimate(self, x_0, true_label, target_label, Nsamp, Niters):
-        result = self._estimate_Lipschitz_multiplerun(Nsamp,Niters,x_0,target_label,true_label)
+    def estimate(self, x_0, true_label, target_label, Nsamp, Niters, sample_norm):
+        result = self._estimate_Lipschitz_multiplerun(Nsamp,Niters,x_0,target_label,true_label,sample_norm)
         return result
 
 

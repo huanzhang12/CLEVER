@@ -37,6 +37,7 @@ if __name__ == "__main__":
     parser.add_argument("--target_type", type=int, default=0b01111, help = "Binary mask for selecting targeted attack classes. bit0: top-2, bit1: random, bit2: least likely, bit3: use --ids override (UNSUPPORTED), bit4: use all labels (for untargeted)")
     parser.add_argument("-f", "--firstimg", type=int, default=0, help = "start from which image in dataset")
     parser.add_argument("--compute_slope", action='store_true', help = "collect slope estimate")
+    parser.add_argument("--sample_norm", type=str, choices=["l2", "li"], help = "norm of sampling ball (l2 or li)", default="l2")
     parser.add_argument("--fix_dirty_bug", action='store_true', help = "do not use (UNSUPPORTED)")
     parser.add_argument("-b", "--batch_size", type=int, default=0, help = "batch size to run model. 0: use default batch size")
     parser.add_argument("--nthreads", type=int, default=0, help = "number of threads for generating random samples in sphere")
@@ -136,7 +137,7 @@ if __name__ == "__main__":
             print('Target class: ', target_label)
             sys.stdout.flush()
             
-            [L2_max,L1_max,Li_max,G2_max,G1_max,Gi_max,g_x0,pred] = clever_estimator.estimate(input_img, true_label, target_label, Nsamp, Niters)
+            [L2_max,L1_max,Li_max,G2_max,G1_max,Gi_max,g_x0,pred] = clever_estimator.estimate(input_img, true_label, target_label, Nsamp, Niters, args['sample_norm'])
             print("[STATS][L1] total = {}, seq = {}, id = {}, time = {:.3f}, true_class = {}, target_class = {}, info = {}".format(total, i, true_ids[i], time.time() - timestart, true_label, target_label, img_info[i]))
             # save to sampling results to matlab ;)
             mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i])
