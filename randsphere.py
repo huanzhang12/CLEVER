@@ -7,7 +7,7 @@ from scipy.special import gammainc
 
 
 """
-Original Matlab code:
+Original Matlab code (for L2 sampling):
 
 function X = randsphere(m,n,r)
 
@@ -16,34 +16,37 @@ s2 = sum(X.^2,2);
 X = X.*repmat(r*(gammainc(s2/2,n/2).^(1/n))./sqrt(s2),1,n);
 """
 
-def randsphere_l2(idx, n, r, total_size, scale_size, tag_prefix, input_shape, X = None):
-    result_arr = NpShmemArray(np.float32, (total_size, n), tag_prefix + "randsphere", False)
-    # for scale, we may want a different starting point for imagenet, which is scale_start
-    scale = NpShmemArray(np.float32, (scale_size, 1), tag_prefix + "scale", False)
-    input_example = NpShmemArray(np.float32, input_shape, tag_prefix + "input_example", False)
-    all_inputs = NpShmemArray(np.float32, (total_size,) + input_example.shape, tag_prefix + "all_inputs", False)
-    # m is the number of items, off is the offset
-    m, offset, scale_start = idx
-    if X is None:
-        # if X is not specified, then generate X as random gaussian
-        # n is the dimension
-        X = np.random.randn(m, n)
-    else:
-        # for testing
-        # if X is specified, then set m and n accordingly
-        m = X.shape[0]
-        n = X.shape[1]
+# generate random signs
+def randsign(N):
+    n_bytes = (N + 7) // 8
+    rbytes = np.random.randint(0, 255, dtype=np.uint8, size=n_bytes)
+    return (np.unpackbits(rbytes)[:N] - 0.5) * 2
+
+def l2_samples(m,n):
+    X = np.random.randn(m, n)
     s2 = np.sum(X * X, axis = 1)
-    result_arr[offset : offset + m] = X * (np.tile(r*np.power(gammainc(n/2,s2/2), 1/n) / np.sqrt(s2), (n,1))).T
-    # make a scaling
-    result_arr[offset : offset + m] *= scale[offset + scale_start : offset + scale_start + m]
-    # add to input example
-    all_inputs[offset : offset + m] = input_example
-    result_arr = result_arr.reshape(-1, *input_shape)
-    all_inputs[offset : offset + m] += result_arr[offset : offset + m]
-    return
+    return X * (np.tile(1.0*np.power(gammainc(n/2,s2/2), 1/n) / np.sqrt(s2), (n,1))).T
 
-def randsphere_li(idx, n, r, total_size, scale_size, tag_prefix, input_shape, X = None):
+def linf_samples(m, n):
+    return np.random.uniform(-1.0, 1.0, (m,n))
+
+def l1_samples(m, n):
+    # U is uniform random between 0, 1
+    U = np.random.uniform(0, 1.0, (m,n-1))
+    V = np.empty(shape=(m,n+1))
+    # V is sorted U, with 0 and 1 added to the begin and the end
+    V[:,0] = 0.0
+    V[:,-1] = 1.0
+    V[:,1:-1] = np.sort(U)
+    # X is the interval between each V_i
+    X = V[:,1:] - V[:,:-1]
+    # randomly flip the sign of each X
+    s = randsign(m * n).reshape(m,n)
+    return X * s
+
+def randsphere(idx, n, r, total_size, scale_size, tag_prefix, input_shape, norm):
+    # currently we assume r = 1.0 and rescale using the array "scale"
+    assert r == 1.0
     result_arr = NpShmemArray(np.float32, (total_size, n), tag_prefix + "randsphere", False)
     # for scale, we may want a different starting point for imagenet, which is scale_start
     scale = NpShmemArray(np.float32, (scale_size, 1), tag_prefix + "scale", False)
@@ -51,9 +54,14 @@ def randsphere_li(idx, n, r, total_size, scale_size, tag_prefix, input_shape, X 
     all_inputs = NpShmemArray(np.float32, (total_size,) + input_example.shape, tag_prefix + "all_inputs", False)
     # m is the number of items, off is the offset
     m, offset, scale_start = idx
-    # generate random number uniformly from [-1.0, 1.0]
     # n is the dimension
-    result_arr[offset : offset + m] = np.random.uniform(-1.0, 1.0, (m,n))
+    if norm == "l2":
+        samples = l2_samples(m, n)
+    if norm == "l1":
+        samples = l1_samples(m, n)
+    if norm == "li":
+        samples = linf_samples(m, n)
+    result_arr[offset : offset + m] = samples
     # make a scaling
     result_arr[offset : offset + m] *= scale[offset + scale_start : offset + scale_start + m]
     # add to input example
@@ -61,11 +69,4 @@ def randsphere_li(idx, n, r, total_size, scale_size, tag_prefix, input_shape, X 
     result_arr = result_arr.reshape(-1, *input_shape)
     all_inputs[offset : offset + m] += result_arr[offset : offset + m]
     return
-
-
-if __name__ == "__main__":
-    X = np.array([[0.20432, 0.74511], [0.87845, 0.52853], [0.96227, 0.69554]])
-    import scipy.io as sio
-    X = sio.loadmat('opt_matfiles/test.mat')['X']
-    print(randsphere(3,2,0.5,X))
 

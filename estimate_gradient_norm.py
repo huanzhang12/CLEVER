@@ -21,7 +21,7 @@ import os
 from multiprocessing import Pool, current_process, cpu_count
 from shmemarray import ShmemRawArray, NpShmemArray
 from functools import partial
-from randsphere import randsphere_l2, randsphere_li
+from randsphere import randsphere
 
      
 class EstimateLipschitz(object):
@@ -187,14 +187,15 @@ class EstimateLipschitz(object):
         if sample_norm == "l2":
             # the scaling constant in [a,b]: scale the L2 norm of each sample (has originally norm ~1)
             a = 0; b = 3; 
-            randsphere = randsphere_l2
         elif sample_norm == "li":
             # for Linf we don't need the scaling
             a = 0.1; b = 0.1; 
-            randsphere = randsphere_li
+        elif sample_norm == "l1":
+            # TODO: make the sample ball radius adjustable
+            a = 0; b = 30;
         else:
             raise RuntimeError("Unknown sample_norm " + sample_norm)
-        print('Using sphere', randsphere)
+        print('Using sphere', sample_norm)
         # create necessary shared array structures
         inputs_0 = np.array(input_image)
         tag_prefix = str(os.getpid()) + "_"
@@ -216,7 +217,7 @@ class EstimateLipschitz(object):
         print(self.n_processes, "threads launched with paramter", process_item_list, offset_list)
 
         # create multiple threads to generate samples
-        worker_func = partial(randsphere, n = dimension, input_shape = inputs_0.shape, total_size = total_item_size, scale_size = num+batch_size, tag_prefix = tag_prefix, r = 1.0, X = None)
+        worker_func = partial(randsphere, n = dimension, input_shape = inputs_0.shape, total_size = total_item_size, scale_size = num+batch_size, tag_prefix = tag_prefix, r = 1.0, norm = sample_norm)
         worker_args = list(zip(process_item_list, offset_list, [0] * self.n_processes))
         sample_results = self.pool.map_async(worker_func, worker_args)
 
