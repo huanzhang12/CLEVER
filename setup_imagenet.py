@@ -91,13 +91,13 @@ def AddModel(name, url, model_filename, image_size, label_filename, input_tensor
 
 # pylint: disable=line-too-long
 AddModel('resnet_v2_50', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
-         'frozen_resnet_v2_50.pb', 224, 'labels.txt', 'input:0', 
+         'frozen_resnet_v2_50.pb', 299, 'labels.txt', 'input:0', 
          'resnet_v2_50/predictions/Reshape:0', 'resnet_v2_50/predictions/Reshape_1:0', 'resnet_v2_50/predictions/Shape:0')
 AddModel('resnet_v2_101', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
-         'frozen_resnet_v2_101.pb', 224, 'labels.txt', 'input:0', 
+         'frozen_resnet_v2_101.pb', 299, 'labels.txt', 'input:0', 
          'resnet_v2_101/predictions/Reshape:0', 'resnet_v2_101/predictions/Reshape_1:0', 'resnet_v2_101/predictions/Shape:0')
 AddModel('resnet_v2_152', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
-         'frozen_resnet_v2_152.pb', 224, 'labels.txt', 'input:0', 
+         'frozen_resnet_v2_152.pb', 299, 'labels.txt', 'input:0', 
          'resnet_v2_152/predictions/Reshape:0', 'resnet_v2_152/predictions/Reshape_1:0', 'resnet_v2_152/predictions/Shape:0')
 AddModel('inception_v1', 'http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/frozen_imagenet_models_v1.1.tar.gz',
          'frozen_inception_v1.pb', 224, 'labels.txt', 'input:0', 
