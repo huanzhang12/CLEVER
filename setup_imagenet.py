@@ -51,9 +51,10 @@ import scipy.misc
 
 import numpy as np
 from six.moves import urllib
-import PIL
 import tensorflow as tf
 
+import PIL
+from PIL import Image
 
 
 model_params = {}
@@ -315,7 +316,7 @@ class ImageNetModel:
         # self.sess.graph.as_graph_def(),
         input_map={self.input_name: img, self.shape_name: shape},
         return_elements=[self.output_name])
-      if 'vgg' in self.model_name and use_softmax == True:
+      if 'vgg' in self.model_name and self.use_softmax == True:
         # the pretrained VGG network output is logitimport_graph_defs, need an extra softmax
         self.softmax_tensor = tf.nn.softmax(self.softmax_tensor)
     else:
@@ -413,6 +414,7 @@ def keep_aspect_ratio_transform(img, img_size):
     )
 
     return transformed_img
+
 def readimg(ff, img_size):
   f = "../imagenetdata/imgs/"+ff
   # img = scipy.misc.imread(f)
@@ -422,7 +424,7 @@ def readimg(ff, img_size):
   #   return None
 
   # img = np.array(scipy.misc.imresize(img,(img_size, img_size)),dtype=np.float32)/255.0-.5
-  img = PIL.Image.open(f)
+  img = Image.open(f)
   transformed_img = keep_aspect_ratio_transform(img, img_size)
 
   img = np.array(transformed_img)/255.0-.5
