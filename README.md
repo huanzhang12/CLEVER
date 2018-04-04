@@ -136,23 +136,24 @@ python3 clever.py lipschitz_mat/imagenet_resnet_v2_50/
 
 For this image (`139.00029510.jpg`, which is the first image given the default
 random seed) in dataset, the original class is 139 (bustard), least likely
-class is 20 (chickadee), top-2 class is 83 (ruffed grouse), random class target
+class is 20 (chickadee), top-2 class is 82 (ptarmigan), random class target
 is 708 (pay-phone).  (These can be observed in `[DATAGEN][L1]` lines of the
 output of `collect_gradients.py`). We get the following CLEVER scores:
 
 ```
-[STATS][L0] info = least, least_clever_L1 = 4.8764, least_clever_L2 = 0.47412, least_clever_Li = 0.0018967
-[STATS][L0] info = random, random_clever_L1 = 4.983, random_clever_L2 = 0.4034, random_clever_Li = 0.0019119
-[STATS][L0] info = top2, top2_clever_L1 = 0.07491, top2_clever_L2 = 0.0099927, top2_clever_Li = 5.2723e-05
+[STATS][L0] info = least, least_clever_L1 = 8.1393, least_clever_L2 = 0.64424, least_clever_Li = 0.0029474 
+[STATS][L0] info = random, random_clever_L1 = 4.6543, random_clever_L2 = 0.61181, random_clever_Li = 0.0023765 
+[STATS][L0] info = top2, top2_clever_L1 = 0.99283, top2_clever_L2 = 0.13185, top2_clever_Li = 0.00062238
 ```
 
-The L2 CLEVER score for the three classes are 0.47412, 0.0099927 and 0.4034,
+The L2 CLEVER score for the top-2, random and least-likely classes are 
+0.13185, 0.61181 and 0.64424,
 respectively.  It indicates that it is very easy to attack this image from
-class 139 to 83.  We then run the CW attack, which is the strongest L2 attack
+class 139 to 82.  We then run the CW attack, which is the strongest L2 attack
 to date, on this image with the same three target classes. The distortion of
-adversarial images are 0.82929, 0.016434, 0.78028 for the three targets.
-Indeed, to misclassify the image to class 83, only a very small distortion
-(0.016434) is needed. Also, the CLEVER scores are (usually) less than the L2
+adversarial images are 0.1598, 0.82025, 0.85298 for the three targets.
+Indeed, to misclassify the image to class 82, only a very small distortion
+(0.1598) is needed. Also, the CLEVER scores are (usually) less than the L2
 distortions observed on adversarial examples, but are not too small to be
 useless, reflecting the nature that CLEVER is an estimated robustness lower
 bound.
