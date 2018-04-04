@@ -253,6 +253,7 @@ class EstimateLipschitz(object):
 
         # multiple runs: shuffling the samples 
         for iters in range(Niters):
+            iter_begin_time = time.time()
             
             # shuffled index 
             # idx_shuffle = np.random.permutation(num);
@@ -264,6 +265,8 @@ class EstimateLipschitz(object):
             L_counter = 0
             G_counter = 0
 
+            overhead_time = 0.0
+            overhead_start = time.time()
             # for cifar and mnist, generate random samples for this entire iteration
             if self.dataset != "imagenet":
                 # get samples for this iteration
@@ -272,8 +275,8 @@ class EstimateLipschitz(object):
                 np.clip(all_inputs, -0.5, 0.5, out = clipped_all_inputs)
                 # create multiple threads to generate samples for next batch
                 sample_results = self.pool.map_async(worker_func, worker_args)
+            overhead_time += time.time() - overhead_start
 
-            overhead_time = 0.0
             for i in range(Nbatches):
                 overhead_start = time.time()
                 # for imagenet, generate random samples for this batch only
@@ -335,7 +338,10 @@ class EstimateLipschitz(object):
             G2_max[iters] = np.max(G2)
             G1_max[iters] = np.max(G1)
             Gi_max[iters] = np.max(Gi)
-            print('[STATS][L2] loop = {}, time = {:.5g}, overhead = {:.5g}, L2 = {:.5g}, L1 = {:.5g}, Linf = {:.5g}, G2 = {:.5g}, G1 = {:.5g}, Ginf = {:.5g}'.format(iters, time.time() - search_begin_time, overhead_time, L2_max[iters], L1_max[iters], Li_max[iters], G2_max[iters], G1_max[iters], Gi_max[iters]))
+            if self.compute_slope:
+                print('[STATS][L2] loop = {}, time = {:.5g}, iter_time = {:.5g}, overhead = {:.5g}, L2 = {:.5g}, L1 = {:.5g}, Linf = {:.5g}, G2 = {:.5g}, G1 = {:.5g}, Ginf = {:.5g}'.format(iters, time.time() - search_begin_time, time.time() - iter_begin_time, overhead_time, L2_max[iters], L1_max[iters], Li_max[iters], G2_max[iters], G1_max[iters], Gi_max[iters]))
+            else:
+                print('[STATS][L2] loop = {}, time = {:.5g}, iter_time = {:.5g}, overhead = {:.5g}, G2 = {:.5g}, G1 = {:.5g}, Ginf = {:.5g}'.format(iters, time.time() - search_begin_time, time.time() - iter_begin_time, overhead_time, G2_max[iters], G1_max[iters], Gi_max[iters]))
             sys.stdout.flush()
             # reset per iteration L and G
             if self.compute_slope:
