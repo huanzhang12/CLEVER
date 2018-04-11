@@ -178,9 +178,8 @@ The results will look like the following:
 
 For datasets which have many classes, it is very expensive to evaluate the
 untargeted CLEVER scores.  However, usually the robustness of the top-2
-targeted class can roughly reflect the untargeted robustness.  For example, in
-the bustard image example above, if we run an untargeted CW attack, the class
-of the adversarial example found is indeed class 83 (ruffed grouse).
+targeted class can roughly reflect the untargeted robustness, as it is
+usually one of the easiest classes to change to.
 
 Built-in Models 
 -------------------------------- 
@@ -229,9 +228,15 @@ posix_ipc.ExistentialError: Shared memory with the specified name already exists
 Please delete those residual files in `/dev/shm`
 
 ```
-rm -f /dev/shm/all_inputs
-rm -f /dev/shm/input_example
-rm -f /dev/shm/randsphere
-rm -f /dev/shm/scale
+rm -f /dev/shm/*all_inputs
+rm -f /dev/shm/*input_example
+rm -f /dev/shm/*randsphere
+rm -f /dev/shm/*scale
 ```
+
+For systemd based Linux distributions (for example, Ubuntu 16.04+), it is
+necessary to set `RemoveIPC=no` in `/etc/systemd/logind.conf` and restart
+`systemd-logind` (`sudo systemctl restart systemd-logind.service`) to avoid
+systemd from removing shared memory objects after user logout (which prevents
+CLEVER running in background).
 
