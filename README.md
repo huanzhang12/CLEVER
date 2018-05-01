@@ -240,3 +240,4 @@ necessary to set `RemoveIPC=no` in `/etc/systemd/logind.conf` and restart
 systemd from removing shared memory objects after user logout (which prevents
 CLEVER running in background).
 
+[Discussions with Ian Goodfellow on gradient masking and implmentation on digital computers](https://openreview.net/forum?id=BkUHlMZ0b&noteId=Hyc-dnN6f)
