@@ -16,6 +16,19 @@ by Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Dong Su, Yupeng Gao, Jinfeng Yi, 
 
 \* Equal contribution
 
+### Clarification on Ian Goodfellow's comments:
+
+We received some inquires on [Ian Goodfellow's
+comment](https://arxiv.org/abs/1804.07870) “*Gradient Masking Causes CLEVER to
+Overestimate Adversarial Perturbation Size*” on our paper.  We thank Ian for
+the discussion but the comments are inappropriate and not applicable to our
+paper.  CLEVER is intended to be a tool for network designer and to evaluate
+network robustness in the “white-box” setting.  Especially, the argument that
+on digital computers all functions are not Lipschitz continuous and behave
+like a staircase function (where the gradient is zero almost everywhere) is
+incorrect. Under the white-box setting, gradients can be computed via automatic
+differentiation, which is well supported by mature packages like TensorFlow.
+See [our reply and discussions](https://openreview.net/forum?id=BkUHlMZ0b&noteId=Hyc-dnN6f&noteId=SkzxpFrpz).
 
 Setup and train models
 -------------------------------------
