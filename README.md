@@ -16,7 +16,8 @@ by Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Dong Su, Yupeng Gao, Jinfeng Yi, 
 
 \* Equal contribution
 
-### Clarification on Ian Goodfellow's comments:
+Discussion with Ian Goodfellow and Our Clarifications 
+-------------------------------------
 
 We received some inquires on [Ian Goodfellow's
 comment](https://arxiv.org/abs/1804.07870) “*Gradient Masking Causes CLEVER to
@@ -28,7 +29,7 @@ on digital computers all functions are not Lipschitz continuous and behave
 like a staircase function (where the gradient is zero almost everywhere) is
 incorrect. Under the white-box setting, gradients can be computed via automatic
 differentiation, which is well supported by mature packages like TensorFlow.
-See [our reply and discussions](https://openreview.net/forum?id=BkUHlMZ0b&noteId=Hyc-dnN6f&noteId=SkzxpFrpz).
+See [our reply and discussions with Ian Goodfellow on gradient masking and implmentation on digital computers](https://openreview.net/forum?id=BkUHlMZ0b&noteId=Hyc-dnN6f&noteId=SkzxpFrpz).
 
 Setup and train models
 -------------------------------------
@@ -125,8 +126,8 @@ At the end of the output of `clever.py`, you will see three `[STATS][L0]` lines 
 The scores shown are the average scores for all (in the example above, 10)
 images, with three different target attack classes: least likely, random and
 top-2 (the class with second largest probability).  Three scores are provided:
-CLEVER\_L2, CLEVER\_Linf and CLEVER\_L1, representing the robustness for L2, L1
-and L infinity norm perturbations. CLEVER score for Lp norm roughly reflects
+CLEVER\_L2, CLEVER\_Linf and CLEVER\_L1, representing the robustness for L2, L\_infinity
+and L1 perturbations. CLEVER score for Lp norm roughly reflects
 the minimum Lp norm of adversarial perturbations. A higher CLEVER score
 indicates better network robustness, as the minimum adversarial perturbation is
 likely to have a larger Lp norm. As CLEVER uses a sampling based method, the 
@@ -253,4 +254,3 @@ necessary to set `RemoveIPC=no` in `/etc/systemd/logind.conf` and restart
 systemd from removing shared memory objects after user logout (which prevents
 CLEVER running in background).
 
-[Discussions with Ian Goodfellow on gradient masking and implmentation on digital computers](https://openreview.net/forum?id=BkUHlMZ0b&noteId=Hyc-dnN6f)
