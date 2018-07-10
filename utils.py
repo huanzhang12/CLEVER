@@ -1,3 +1,11 @@
+## Copyright (C) 2017-2018, IBM Corp.
+## Copyright (C) 2017, Lily Weng  <twweng@mit.edu>
+##                and Huan Zhang <ecezhang@ucdavis.edu>
+## Copyright (C) 2016, Nicholas Carlini <nicholas@carlini.com>.
+## 
+## This program is licenced under the Apache 2.0 licence,
+## contained in the LICENCE file in this directory.
+
 import numpy as np
 import random
 
