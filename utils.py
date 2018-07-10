@@ -132,7 +132,8 @@ def generate_data(data, samples, targeted=True, random_and_least_likely = False,
                 n_correct += 1
             for j in seq:
                 # skip the original image label
-                if (j == np.argmax(data.test_labels[start+i])):
+                # if (j == np.argmax(data.test_labels[start+i])):
+                if (j == np.argmax(data.test_labels[start+i]) - int(imagenet and remove_background_class)):
                     continue
                 inputs.append(data.test_data[start+i])
                 if remove_background_class:

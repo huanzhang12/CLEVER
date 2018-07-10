@@ -247,6 +247,11 @@ class ImageNetModelPrediction:
       dat = (0.5 + dat) * 255.0
       imagenet_mean = np.array([104., 117., 124.], dtype=np.float32)
       dat -= imagenet_mean
+    elif 'densenet' in self.model_name:
+      dat = (0.5 + dat) * 255.0
+      imagenet_mean = np.array([123.68, 116.78, 103.94], dtype=np.float32)
+      dat -= imagenet_mean
+      dat = dat * 0.017
     else:
       dat = dat * 2.0
 
@@ -305,6 +310,12 @@ class ImageNetModel:
       img = (0.5 + img) * 255.0
       imagenet_mean = np.array([104., 117., 124.], dtype=np.float32)
       img -= imagenet_mean
+    elif 'densenet' in self.model_name:
+      # convert to 0 - 255 image as input
+      img = (0.5 + img) * 255.0
+      imagenet_mean = np.array([123.68, 116.78, 103.94], dtype=np.float32)
+      img -= imagenet_mean
+      img = img * 0.017
     else:
       img = img * 2.0
 
