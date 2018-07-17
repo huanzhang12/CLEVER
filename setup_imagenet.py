@@ -441,9 +441,11 @@ def readimg(ff, img_size):
   img = np.array(transformed_img)/255.0-.5
   if img.shape != (img_size, img_size, 3):
     # grayscale image
+    """
     if img.shape == (img_size, img_size):
       img = np.repeat(np.expand_dims(img, axis = 2), 3, axis = 2)
       return [img, int(ff.split(".")[0])]
+    """
     return None
   return [img, int(ff.split(".")[0])]
 

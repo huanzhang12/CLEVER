@@ -112,9 +112,21 @@ def generate_data(data, samples, targeted=True, random_and_least_likely = False,
                                 information.append('random')
                 else:
                     # use user specified target classes
-                    seq = target_classes[total - 1]
-                    information.extend(len(seq) * ['user'])
+                    original_predict = np.squeeze(predictor(np.array([data.test_data[start+i]])))
+                    predicted_label = np.argmax(original_predict) + int(imagenet and remove_background_class)
+                    # minus 1 when background class is removed
+                    seq = [x - int(imagenet and remove_background_class) for x in target_classes[total - 1]]
+                    if bin(target_type & 0x0b111).count("1") > 1:
+                        information.extend(len(seq) * ['user'])
+                    else:
+                        if target_type & 0b0100:
+                            information.extend(len(seq) * ['least'])
+                        if target_type & 0b0001:
+                            information.extend(len(seq) * ['top2'])
+                        if target_type & 0b0010:
+                            information.extend(len(seq) * ['random'])
             else:
+                predicted_label = np.argmax(original_predict) + int(imagenet and remove_background_class)
                 if imagenet:
                     if remove_background_class:
                         seq = random.sample(range(0,1000), 10)
