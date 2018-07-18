@@ -5,7 +5,9 @@
 rm /tmp/gpu_lock_*
 
 model="$@"
-nthreads=6
+ngpu=$(nvidia-smi topo -m | grep '^GPU' | wc -l)
+nproc=$(nproc)
+nthreads=$((nproc / ngpu))
 
 declare -A batchsize=( ["resnet_v2_50"]="128" ["resnet_v2_101"]="128" ["resnet_v2_152"]="64" ["inception_v1"]="512" ["inception_v2"]="512" ["inception_v3"]="256" ["inception_v4"]="64" ["inception_resnet_v2"]="64" ["vgg_16"]="128" ["vgg_19"]="128" ["mobilenet_v1_025"]="1024" ["mobilenet_v1_050"]="1024" ["mobilenet_v1_100"]="512" ["nasnet_large"]="16" ["densenet121_k32"]="128" ["densenet169_k32"]="128" ["densenet161_k48"]="64" ["alexnet"]="512")
 
