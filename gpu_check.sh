@@ -3,7 +3,7 @@
 ngpu=$(nvidia-smi topo -m | grep '^GPU' | wc -l)
 prefix="/tmp/gpu_lock_"
 
-sleep $[ ( $RANDOM % 3 ) ].$[ ( $RANDOM % 1000 ) + 1 ]s
+sleep $[ ( $RANDOM % 5 ) ].$[ ( $RANDOM % 1000 ) + 1 ]s
 
 while :; do
     for ((i=1;i<=${ngpu};i++)); do
@@ -15,6 +15,7 @@ while :; do
             export CUDA_VISIBLE_DEVICES=$(expr ${i} - 1)
             "$@"
             ret=$?
+            echo "work done"
             rm ${prefix}${i}
             exit $ret
         fi
