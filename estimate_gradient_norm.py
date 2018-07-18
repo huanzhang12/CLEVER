@@ -251,6 +251,7 @@ class EstimateLipschitz(object):
         Gi = np.zeros(num)
         # how many batches we have
         Nbatches = num // batch_size
+        print("{} samples in {} batches".format(num, Nbatches))
 
         # timer
         search_begin_time = time.time()
@@ -292,6 +293,7 @@ class EstimateLipschitz(object):
                     # create multiple threads to generate samples for next batch
                     worker_args = zip(process_item_list, offset_list, [(i + 1) * batch_size] * self.n_processes)
                     sample_results = self.pool.map_async(worker_func, worker_args)
+                    print(batch_size)
 
                 if self.dataset == "imagenet":
                     # we generate samples for each batch at a time
