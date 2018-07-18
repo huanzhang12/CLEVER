@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ngpu=2
+ngpu=4
 prefix="lock_"
 
 sleep $[ ( $RANDOM % 3 ) ].$[ ( $RANDOM % 1000 ) + 1 ]s
