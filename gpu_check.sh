@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ngpu=4
-prefix="lock_"
+prefix="/tmp/gpu_lock_"
 
 sleep $[ ( $RANDOM % 3 ) ].$[ ( $RANDOM % 1000 ) + 1 ]s
 

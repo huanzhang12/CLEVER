@@ -2,7 +2,7 @@
 
 # to run: xargs -I{} -P 4 bash -c ./gpu_check.sh {}; touch /tmp/stop_job
 
-rm lock_*
+rm /tmp/gpu_lock_*
 
 model="$@"
 
