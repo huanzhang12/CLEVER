@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# to run: xargs -I{} -P 4 bash -c ./gpu_check.sh {}; touch /tmp/stop_job
+# bash run_networks.sh nasnet_large | shuf | xargs -I{} -P 4 bash -c "./gpu_check.sh {}"; sleep 100; touch /tmp/stop_job
 
 rm /tmp/gpu_lock_*
 
