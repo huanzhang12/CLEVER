@@ -437,7 +437,7 @@ if __name__ == "__main__":
             clever_L1 = reduce_op(info_bounds[0])
             clever_L2 = reduce_op(info_bounds[1])
             clever_Li = reduce_op(info_bounds[2])
-            print('[STATS][L0] info = {}, {}_clever_L1 = {:.5g}, {}_clever_L2 = {:.5g}, {}_clever_Li = {:.5g}'.format(info, info, clever_L1, info, clever_L2, info, clever_Li))
+            print('[STATS][L0] info = {}, total = {}, {}_clever_L1 = {:.5g}, {}_clever_L2 = {:.5g}, {}_clever_Li = {:.5g}'.format(info, len(info_bounds[0]), info, clever_L1, info, clever_L2, info, clever_Li))
             sys.stdout.flush()
 
 
