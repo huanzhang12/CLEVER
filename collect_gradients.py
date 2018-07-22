@@ -141,10 +141,13 @@ if __name__ == "__main__":
             print('Target class: ', target_label)
             sys.stdout.flush()
             
+            mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i])
+            if os.path.isfile(mat_path + ".mat"):
+                print("file {}.mat already exists. Skipping this sample...".format(mat_path))
+                continue
             [L2_max,L1_max,Li_max,G2_max,G1_max,Gi_max,g_x0,pred] = clever_estimator.estimate(input_img, true_label, target_label, Nsamp, Niters, args['sample_norm'])
             print("[STATS][L1] total = {}, seq = {}, id = {}, time = {:.3f}, true_class = {}, target_class = {}, info = {}".format(total, i, true_ids[i], time.time() - timestart, true_label, target_label, img_info[i]))
             # save to sampling results to matlab ;)
-            mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i])
             save_dict = {'L2_max': L2_max, 'L1_max': L1_max, 'Li_max': Li_max, 'G2_max': G2_max, 'G1_max': G1_max, 'Gi_max': Gi_max, 'pred': pred, 'g_x0': g_x0, 'id': true_ids[i], 'true_label': true_label, 'target_label': target_label, 'info':img_info[i], 'args': args, 'path': mat_path}
             sio.savemat(mat_path, save_dict)
             print('saved to', mat_path)
