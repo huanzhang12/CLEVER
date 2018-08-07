@@ -18,6 +18,13 @@ by Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Dong Su, Yupeng Gao, Jinfeng Yi, 
 
 \* Equal contribution
 
+News
+-------------------------------------
+
+- Aug 6, 2018: CLEVER evaluation with input transformations (e.g., staircase
+  function or JPEG compression) is implemented via BPDA (Backward Pass
+  Differentiable Approximation)
+
 Discussion with Ian Goodfellow and Our Clarifications 
 -------------------------------------
 
@@ -102,6 +109,20 @@ changed by specifying the `--saved <folder name>` parameter), as
 a few `.mat` files.
 
 Run `python3 collect_gradients.py -h` for additional help information.
+
+**Updated:** For model with input transformation, use an additional parameter
+`--transform`.  Currently three input transformations are supported (bit-depth
+reduction, JPEG compression and PNG compression, corresponding to
+`defend_reduce`, `defend_jpeg`, `defend_png` options).  For example:
+
+```
+python3 collect_gradients.py --dataset cifar --numimg 10 --transform defend_jpeg
+```
+
+You should expect roughly the same CLEVER score with input transformations,
+as input transformations do not increase model's intrinsic robustness and can
+be broken by BPDA.
+See `defense.py` for the implementations of input transformations.
 
 ### Step 2: Compute the CLEVER score
 

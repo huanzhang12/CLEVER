@@ -4,7 +4,8 @@ import numpy as np
 import time
 from shmemarray import ShmemRawArray, NpShmemArray
 from scipy.special import gammainc
-
+from defense import defend_reduce, defend_jpeg, defend_tv, defend_none, defend_png
+from functools import partial
 
 """
 Original Matlab code (for L2 sampling):
@@ -44,7 +45,7 @@ def l1_samples(m, n):
     s = randsign(m * n).reshape(m,n)
     return X * s
 
-def randsphere(idx, n, r, total_size, scale_size, tag_prefix, input_shape, norm):
+def randsphere(idx, n, r, total_size, scale_size, tag_prefix, input_shape, norm, transform = None):
     # currently we assume r = 1.0 and rescale using the array "scale"
     assert r == 1.0
     result_arr = NpShmemArray(np.float32, (total_size, n), tag_prefix + "randsphere", False)
@@ -68,5 +69,14 @@ def randsphere(idx, n, r, total_size, scale_size, tag_prefix, input_shape, norm)
     all_inputs[offset : offset + m] = input_example
     result_arr = result_arr.reshape(-1, *input_shape)
     all_inputs[offset : offset + m] += result_arr[offset : offset + m]
+    # apply an transformation
+    if transform:
+        transform_new = lambda x: (eval(transform)(np.squeeze(x) + 0.5) - 0.5).reshape(all_inputs[offset].shape)
+        # before transformation we need to clip first
+        np.clip(all_inputs[offset : offset + m], -0.5, 0.5, out = all_inputs[offset : offset + m])
+        # run transformation
+        for i in range(offset, offset + m):
+            all_inputs[i] = transform_new(all_inputs[i])
+        # we need to clip again after transformation (this is in the caller)
     return
 

@@ -143,7 +143,7 @@ class EstimateLipschitz(object):
 
         return self.img, self.output
 
-    def _estimate_Lipschitz_multiplerun(self, num, niters, input_image, target_label, true_label, sample_norm = "l2"):
+    def _estimate_Lipschitz_multiplerun(self, num, niters, input_image, target_label, true_label, sample_norm = "l2", transform = None):
         """
         num: number of samples per iteration
         niters: number of iterations
@@ -225,7 +225,7 @@ class EstimateLipschitz(object):
         print(self.n_processes, "threads launched with paramter", process_item_list, offset_list)
 
         # create multiple threads to generate samples
-        worker_func = partial(randsphere, n = dimension, input_shape = inputs_0.shape, total_size = total_item_size, scale_size = num+batch_size, tag_prefix = tag_prefix, r = 1.0, norm = sample_norm)
+        worker_func = partial(randsphere, n = dimension, input_shape = inputs_0.shape, total_size = total_item_size, scale_size = num+batch_size, tag_prefix = tag_prefix, r = 1.0, norm = sample_norm, transform = transform)
         worker_args = list(zip(process_item_list, offset_list, [0] * self.n_processes))
         sample_results = self.pool.map_async(worker_func, worker_args)
 
@@ -374,8 +374,8 @@ class EstimateLipschitz(object):
         # terminate the pool
         self.pool.terminate()
 
-    def estimate(self, x_0, true_label, target_label, Nsamp, Niters, sample_norm):
-        result = self._estimate_Lipschitz_multiplerun(Nsamp,Niters,x_0,target_label,true_label,sample_norm)
+    def estimate(self, x_0, true_label, target_label, Nsamp, Niters, sample_norm, transform):
+        result = self._estimate_Lipschitz_multiplerun(Nsamp,Niters,x_0,target_label,true_label,sample_norm,transform)
         return result
 
 
