@@ -34,6 +34,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--dataset", choices=["mnist", "cifar", "imagenet"], default="mnist", help = "choose dataset")
     parser.add_argument("-m", "--model_name", default="normal", 
             help = "Select model. For MNIST and CIFAR, options are: 2-layer (MLP), normal (7-layer CNN), distilled (7-layer CNN with defensive distillation), brelu (7-layer CNN with Bounded ReLU). For ImageNet, available options are: resnet_v2_50, resnet_v2_101, resnet_v2_152, inception_v1, inception_v2, inception_v3, inception_v4, inception_resnet_v2, vgg_16, vgg_19, mobilenet_v1_025, mobilenet_v1_050, mobilenet_v1_100, alexnet, nasnet_large, densenet121_k32, densenet169_k32, densenet161_k48")
+    parser.add_argument("--activation", type=str, choices=["relu", "tanh", "sigmoid", "elu", "softplus", "hard_sigmoid", "arctan"], help = "activation functions", default="relu")
     parser.add_argument("-N", "--Nsamps", type=int, default=1024, help = "number of samples per iterations")
     parser.add_argument("-i", "--Niters", type=int, default=500, help = "number of iterations. NITERS maximum gradient norms will be collected. A larger value will give a more accurate estimate")
     parser.add_argument("-n", "--numimg", type=int, default=1, help = "number of test images to load from dataset")
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument("--target_type", type=int, default=0b01111, help = "Binary mask for selecting targeted attack classes. bit0: top-2, bit1: random, bit2: least likely, bit3: use --ids override (UNSUPPORTED), bit4: use all labels (for untargeted)")
     parser.add_argument("-f", "--firstimg", type=int, default=0, help = "start from which image in dataset")
     parser.add_argument("--transform", default="", help = "input transformation function (defend_reduce, defend_jpeg, defend_png)")
+    parser.add_argument("--order", type = int, default=1, choices=[1,2], help = "1: first order bound, 2: second order bound for twice differentiable activations")
     parser.add_argument("--compute_slope", action='store_true', help = "collect slope estimate")
     parser.add_argument("--sample_norm", type=str, choices=["l2", "li", "l1"], help = "norm of sampling ball (l2, l1 or li)", default="l2")
     parser.add_argument("--fix_dirty_bug", action='store_true', help = "do not use (UNSUPPORTED)")
@@ -102,7 +104,7 @@ if __name__ == "__main__":
     with tf.Session(config=config) as sess:
         clever_estimator.sess = sess
         # returns the input tensor and output prediction vector
-        img, output = clever_estimator.load_model(dataset, model_name, batch_size = args['batch_size'], compute_slope = args['compute_slope'])
+        img, output = clever_estimator.load_model(dataset, model_name, activation = args['activation'], batch_size = args['batch_size'], compute_slope = args['compute_slope'], order = args['order'])
         # load dataset
         datasets_loader = {"mnist": MNIST, "cifar": CIFAR, "imagenet": partial(ImageNet, clever_estimator.model.image_size)}
         data = datasets_loader[dataset]()
@@ -141,13 +143,25 @@ if __name__ == "__main__":
             target_label = np.argmax(targets[i]);
             print('Target class: ', target_label)
             sys.stdout.flush()
-            
-            [L2_max,L1_max,Li_max,G2_max,G1_max,Gi_max,g_x0,pred] = clever_estimator.estimate(input_img, true_label, target_label, Nsamp, Niters, args['sample_norm'], args['transform'])
-            print("[STATS][L1] total = {}, seq = {}, id = {}, time = {:.3f}, true_class = {}, target_class = {}, info = {}".format(total, i, true_ids[i], time.time() - timestart, true_label, target_label, img_info[i]))
-            # save to sampling results to matlab ;)
-            mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i])
-            save_dict = {'L2_max': L2_max, 'L1_max': L1_max, 'Li_max': Li_max, 'G2_max': G2_max, 'G1_max': G1_max, 'Gi_max': Gi_max, 'pred': pred, 'g_x0': g_x0, 'id': true_ids[i], 'true_label': true_label, 'target_label': target_label, 'info':img_info[i], 'args': args, 'path': mat_path}
-            sio.savemat(mat_path, save_dict)
-            print('saved to', mat_path)
-            sys.stdout.flush()
+           
+            if args['order'] == 1:
+                [L2_max,L1_max,Li_max,G2_max,G1_max,Gi_max,g_x0,pred] = clever_estimator.estimate(input_img, true_label, target_label, Nsamp, Niters, args['sample_norm'], args['transform'], args['order'])
+                print("[STATS][L1] total = {}, seq = {}, id = {}, time = {:.3f}, true_class = {}, target_class = {}, info = {}".format(total, i, true_ids[i], time.time() - timestart, true_label, target_label, img_info[i]))
+                # save to sampling results to matlab ;)
+                mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}_{}_order{}".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i], args['activation'], args['order'])
+                save_dict = {'L2_max': L2_max, 'L1_max': L1_max, 'Li_max': Li_max, 'G2_max': G2_max, 'G1_max': G1_max, 'Gi_max': Gi_max, 'pred': pred, 'g_x0': g_x0, 'id': true_ids[i], 'true_label': true_label, 'target_label': target_label, 'info':img_info[i], 'args': args, 'path': mat_path}
+                sio.savemat(mat_path, save_dict)
+                print('saved to', mat_path)
+                sys.stdout.flush()
+            elif args['order'] == 2:
+                [H2_max,g_x0,g_x0_grad_2_norm,g_x0_grad_1_norm,g_x0_grad_inf_norm,pred] = clever_estimator.estimate(input_img, true_label, target_label, Nsamp, Niters, args['sample_norm'], args['transform'], args['order'])
+                #print("[STATS][L1] H2_max = {}, g_x0 = {:.5g}, g_x0_grad_2_norm = {:.5g}, g_x0_grad_1_norm = {:.5g}, g_x0_grad_inf_norm = {:.5g}, pred = {}".format(H2_max,g_x0,g_x0_grad_2_norm, g_x0_grad_1_norm, g_x0_grad_inf_norm, pred))
+                print("[STATS][L1] total = {}, seq = {}, id = {}, time = {:.3f}, true_class = {}, target_class = {}, info = {}".format(total, i, true_ids[i], time.time() - timestart, true_label, target_label, img_info[i]))
+                ### Lily TODO: save the computed quantities to mat file
+                # save to sampling results to matlab ;)
+                mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}_{}_order{}".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i], args['activation'], args['order'])
+                save_dict = {'H2_max': H2_max, 'pred': pred, 'g_x0': g_x0, 'id': true_ids[i], 'true_label': true_label, 'target_label': target_label, 'info':img_info[i], 'args': args, 'path': mat_path, 'g_x0_grad_2_norm': g_x0_grad_2_norm}
+                sio.savemat(mat_path, save_dict)
+                print('saved to', mat_path)
+                sys.stdout.flush()
 

@@ -91,13 +91,16 @@ class CIFAR:
         self.train_labels = train_labels[VALIDATION_SIZE:]
 
 class CIFARModel:
-    def __init__(self, restore=None, session=None, use_softmax=False, use_brelu = False):
+    def __init__(self, restore=None, session=None, use_softmax=False, use_brelu = False, activation = "relu"):
         def bounded_relu(x):
                 return K.relu(x, max_value=1)
         if use_brelu:
             activation = bounded_relu
         else:
-            activation = 'relu'
+            activation = activation
+
+        print("inside CIFARModel: activation = {}".format(activation))
+
         self.num_channels = 3
         self.image_size = 32
         self.num_labels = 10

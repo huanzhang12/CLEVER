@@ -64,13 +64,14 @@ class MNIST:
 
 
 class MNISTModel:
-    def __init__(self, restore = None, session=None, use_softmax=False, use_brelu = False):
+    def __init__(self, restore = None, session=None, use_softmax=False, use_brelu = False, activation = "relu"):
         def bounded_relu(x):
                 return K.relu(x, max_value=1)
         if use_brelu:
             activation = bounded_relu
-        else:
-            activation = 'relu'
+
+        print("inside MNISTModel: activation = {}".format(activation))
+
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10

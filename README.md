@@ -24,6 +24,8 @@ News
 - Aug 6, 2018: CLEVER evaluation with input transformations (e.g., staircase
   function or JPEG compression) is implemented via BPDA (Backward Pass
   Differentiable Approximation)
+- Aug 16, 2018: added 2nd order CLEVER evaluation implementation, which can be
+  used to evaluate robustness on classifiers that are twice-differentiable. 
 
 Discussion with Ian Goodfellow and Our Clarifications 
 -------------------------------------
@@ -123,6 +125,20 @@ You should expect roughly the same CLEVER score with input transformations,
 as input transformations do not increase model's intrinsic robustness and can
 be broken by BPDA.
 See `defense.py` for the implementations of input transformations.
+
+**Updated:** To run 2nd order clever score, run.sh can be used and set order = 2: 
+
+```
+./run.sh model modeltype nsamp niters activation order target gpuNum
+```
+For example, to get 1000 samples of 2nd order clever with 100 iterations on a mnist 7-layer cnn model with tanh activation and random target:
+
+```
+./run.sh mnist normal 1000 100 tanh 2 rand 
+```
+
+To get samples for the original clever score (1st order approximation), set order = 1. 
+
 
 ### Step 2: Compute the CLEVER score
 
