@@ -61,11 +61,14 @@ git clone https://github.com/huanzhang12/CLEVER.git
 cd CLEVER
 ```
 
-Prepare the MNIST and CIFAR-10 data and models:
+Prepare the MNIST and CIFAR-10 data and models with different activation functions:
 
 ```
 python3 train_models.py
 python3 train_2layer.py
+python train_nlayer.py --model mnist --modeltype cnn --activation tanh 32 32 64 64 200 200 
+python3 train_nlayer.py --model cifar --modeltype cnn --activation tanh 64 64 128 128 256 256 
+ 
 ```
 
 To download the ImageNet models:
