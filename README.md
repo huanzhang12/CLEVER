@@ -12,9 +12,10 @@ examples.  CLEVER can be efficiently computed even for large state-of-the-art
 ImageNet models like ResNet-50 and Inception-v3.
 
 For more details, please see our paper:
-Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Dong Su, Yupeng Gao, Jinfeng Yi, Cho-Jui Hsieh and Luca Daniel,["Evaluating the Robustness of Neural Networks: An Extreme Value Theory Approach"](https://openreview.net/pdf?id=BkUHlMZ0b), ICLR 2018 
 
-Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Aurelie Lozano, Cho-Jui Hsieh and Luca Daniel, ["On Extensions of CLEVER: A Neural Network Robustness Evaluation Algorithm"](https://arxiv.org/pdf/1810.08640.pdf), IEEE GlobalSIP 2018
+1. Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Dong Su, Yupeng Gao, Jinfeng Yi, Cho-Jui Hsieh and Luca Daniel,["Evaluating the Robustness of Neural Networks: An Extreme Value Theory Approach"](https://openreview.net/pdf?id=BkUHlMZ0b), ICLR 2018 
+
+2. Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Aurelie Lozano, Cho-Jui Hsieh and Luca Daniel, ["On Extensions of CLEVER: A Neural Network Robustness Evaluation Algorithm"](https://arxiv.org/pdf/1810.08640.pdf), IEEE GlobalSIP 2018
 
 
 \* Equal contribution
