@@ -12,9 +12,10 @@ examples.  CLEVER can be efficiently computed even for large state-of-the-art
 ImageNet models like ResNet-50 and Inception-v3.
 
 For more details, please see our paper:
+Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Dong Su, Yupeng Gao, Jinfeng Yi, Cho-Jui Hsieh and Luca Daniel,["Evaluating the Robustness of Neural Networks: An Extreme Value Theory Approach"](https://openreview.net/pdf?id=BkUHlMZ0b), ICLR 2018 
 
-[Evaluating the Robustness of Neural Networks: An Extreme Value Theory Approach](https://openreview.net/pdf?id=BkUHlMZ0b)
-by Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Dong Su, Yupeng Gao, Jinfeng Yi, Cho-Jui Hsieh and Luca Daniel
+Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Aurelie Lozano, Cho-Jui Hsieh and Luca Daniel, ["On Extensions of CLEVER: A Neural Network Robustness Evaluation Algorithm"](https://arxiv.org/pdf/1810.08640.pdf), IEEE GlobalSIP 2018
+
 
 \* Equal contribution
 
@@ -26,6 +27,7 @@ News
   Differentiable Approximation)
 - Aug 16, 2018: added 2nd order CLEVER evaluation implementation, which can be
   used to evaluate robustness on classifiers that are twice-differentiable. 
+- Oct 23, 2018: Our work on extension of CLEVER is accepted by GlobalSIP 2018: [On Extensions of CLEVER: A Neural Network Robustness Evaluation Algorithm](https://arxiv.org/pdf/1810.08640.pdf)
 
 Discussion with Ian Goodfellow and Our Clarifications 
 -------------------------------------
