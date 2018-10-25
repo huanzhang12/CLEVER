@@ -32,7 +32,7 @@ Cite our works
 ```
 ```
 @inproceedings{weng2018cleverExtension,
-  author = "Tsui-Wei Weng AND Huan Zhang AND Pin-Yu Chen AND Cho-Jui Hsieh AND Luca Daniel",
+  author = "Tsui-Wei Weng AND Huan Zhang AND Pin-Yu Chen AND Aurelie Lozano AND Cho-Jui Hsieh AND Luca Daniel",
   title = "On Extensions of CLEVER: A Neural Network Robustness Evaluation Algorithm",
   booktitle = "IEEE Global Conference on Signal and Information Processing (GlobalSIP)",
   year = "2018",
