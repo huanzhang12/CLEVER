@@ -13,12 +13,34 @@ ImageNet models like ResNet-50 and Inception-v3.
 
 For more details, please see our paper:
 
-1. Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Dong Su, Yupeng Gao, Jinfeng Yi, Cho-Jui Hsieh and Luca Daniel,["Evaluating the Robustness of Neural Networks: An Extreme Value Theory Approach"](https://openreview.net/pdf?id=BkUHlMZ0b), ICLR 2018 
+1. Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Jinfeng Yi, Dong Su, Yupeng Gao, Cho-Jui Hsieh and Luca Daniel,["Evaluating the Robustness of Neural Networks: An Extreme Value Theory Approach"](https://openreview.net/pdf?id=BkUHlMZ0b), ICLR 2018 
 
 2. Tsui-Wei Weng\*, Huan Zhang\*, Pin-Yu Chen, Aurelie Lozano, Cho-Jui Hsieh and Luca Daniel, ["On Extensions of CLEVER: A Neural Network Robustness Evaluation Algorithm"](https://arxiv.org/pdf/1810.08640.pdf), IEEE GlobalSIP 2018
 
 
 \* Equal contribution
+
+Cite our works
+```
+@inproceedings{weng2018clever,
+  author = "Tsui-Wei Weng AND Huan Zhang AND Pin-Yu Chen AND Jinfeng Yi AND Dong Su AND Yupeng Gao AND Cho-Jui Hsieh AND Luca Daniel",
+  title = "Evaluating the Robustness of Neural Networks: An Extreme Value Theory Approach",
+  booktitle = "International Conference on Learning Representations (ICLR)",
+  year = "2018",
+  month = "may"
+}
+```
+```
+@inproceedings{weng2018cleverExtension,
+  author = "Tsui-Wei Weng AND Huan Zhang AND Pin-Yu Chen AND Cho-Jui Hsieh AND Luca Daniel",
+  title = "On Extensions of CLEVER: A Neural Network Robustness Evaluation Algorithm",
+  booktitle = "IEEE Global Conference on Signal and Information Processing (GlobalSIP)",
+  year = "2018",
+  month = "nov"
+}
+```
+
+
 
 News
 -------------------------------------
