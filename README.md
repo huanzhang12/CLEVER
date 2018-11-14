@@ -1,4 +1,4 @@
-**As requested by IBM, this repository is moved to https://github.com/IBM/CROWN-Robustness-Certification, but we aim to keep both repositories synced up.** The code is released under Apache License v2.
+**As requested by IBM, this repository is moved to https://github.com/IBM/CLEVER-Robustness-Score, but we aim to keep both repositories synced up.** The code is released under Apache License v2.
 
 CLEVER: A Robustness Metric For Deep Neural Networks
 =====================================
