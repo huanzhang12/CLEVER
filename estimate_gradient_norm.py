@@ -461,8 +461,9 @@ class EstimateLipschitz(object):
                     perturbed_predicts, perturbed_grad_2_norm, perturbed_grad_1_norm, perturbed_grad_inf_norm = self.sess.run(
                             [self.output, self.grad_2_norm_op, self.grad_1_norm_op, self.grad_inf_norm_op], 
                             feed_dict = {self.img: batch_inputs, self.target_label: target_label, self.true_label: true_label})
-                
+
                     if self.compute_slope:
+                        s = batch_inputs.reshape(batch_size, -1)
                         # compute distance between consecutive samples: not use sequential samples 
                         s12_2_norm = np.linalg.norm(s[0:batch_size-1:2] - s[1:batch_size:2], axis = 1)
                         s12_1_norm = np.linalg.norm(s[0:batch_size-1:2] - s[1:batch_size:2], ord=1, axis = 1)
