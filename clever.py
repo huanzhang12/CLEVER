@@ -51,14 +51,14 @@ def fit_and_test(rescaled_sample, sample, loc_shift, shape_rescale, optimizer, c
     ks, pVal = scipy.stats.kstest(-sample, 'weibull_min', args = (c, loc, scale))
     return c, loc, scale, ks, pVal
 
-def plot_weibull(sample,c,loc,scale,ks,pVal,p,q,figname = "Lily_weibull_test.png"):
+def plot_weibull(sample,c,loc,scale,ks,pVal,p,q,figname):
     
     # compare the sample histogram and fitting result
     fig, ax = plt.subplots(1,1)
     
     x = np.linspace(-1.01*max(sample),-0.99*min(sample),100);
     ax.plot(x,weibull_min.pdf(x,c,loc,scale),'r-',label='fitted pdf '+p+'-bnd')
-    ax.hist(-sample, normed=True, bins=20, histtype='stepfilled')
+    ax.hist(-sample, density=True, bins=20, histtype='stepfilled')
     ax.legend(loc='best', frameon=False)
     plt.xlabel('-Lips_'+q)
     plt.ylabel('pdf')
@@ -156,13 +156,12 @@ def get_lipschitz_estimate(G_max, norm = "L2", figname = "", use_reg = False, sh
     else:
         print("Lipschitz norm is not in 1, 2, i!")
     
-    figname = figname + '_'+ "L"+ p + ".png"
-
     if plot_res is not None:
         plot_res.get()
     
     # plot_weibull(G_max,c,loc,scale,ks,pVal,p,q,figname)
     if figname:
+        figname = figname + '_'+ "L"+ p + ".png"
         plot_res = pool.apply_async(plot_weibull, (G_max,c,loc,scale,ks,pVal,p,q,figname))
     
     return {'Lips_est':-loc, 'shape':c, 'loc': loc, 'scale': scale, 'ks': ks, 'pVal': pVal}

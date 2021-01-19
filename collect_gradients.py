@@ -148,18 +148,16 @@ if __name__ == "__main__":
                 [L2_max,L1_max,Li_max,G2_max,G1_max,Gi_max,g_x0,pred] = clever_estimator.estimate(input_img, true_label, target_label, Nsamp, Niters, args['sample_norm'], args['transform'], args['order'])
                 print("[STATS][L1] total = {}, seq = {}, id = {}, time = {:.3f}, true_class = {}, target_class = {}, info = {}".format(total, i, true_ids[i], time.time() - timestart, true_label, target_label, img_info[i]))
                 # save to sampling results to matlab ;)
-                mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}_{}_order{}".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i], args['activation'], args['order'])
+                mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}_{}_order{}.mat".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i], args['activation'], args['order'])
                 save_dict = {'L2_max': L2_max, 'L1_max': L1_max, 'Li_max': Li_max, 'G2_max': G2_max, 'G1_max': G1_max, 'Gi_max': Gi_max, 'pred': pred, 'g_x0': g_x0, 'id': true_ids[i], 'true_label': true_label, 'target_label': target_label, 'info':img_info[i], 'args': args, 'path': mat_path}
                 sio.savemat(mat_path, save_dict)
                 print('saved to', mat_path)
                 sys.stdout.flush()
             elif args['order'] == 2:
                 [H2_max,g_x0,g_x0_grad_2_norm,g_x0_grad_1_norm,g_x0_grad_inf_norm,pred] = clever_estimator.estimate(input_img, true_label, target_label, Nsamp, Niters, args['sample_norm'], args['transform'], args['order'])
-                #print("[STATS][L1] H2_max = {}, g_x0 = {:.5g}, g_x0_grad_2_norm = {:.5g}, g_x0_grad_1_norm = {:.5g}, g_x0_grad_inf_norm = {:.5g}, pred = {}".format(H2_max,g_x0,g_x0_grad_2_norm, g_x0_grad_1_norm, g_x0_grad_inf_norm, pred))
                 print("[STATS][L1] total = {}, seq = {}, id = {}, time = {:.3f}, true_class = {}, target_class = {}, info = {}".format(total, i, true_ids[i], time.time() - timestart, true_label, target_label, img_info[i]))
-                ### Lily TODO: save the computed quantities to mat file
                 # save to sampling results to matlab ;)
-                mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}_{}_order{}".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i], args['activation'], args['order'])
+                mat_path = "{}/{}_{}/{}_{}_{}_{}_{}_{}_{}_order{}.mat".format(save_path, dataset, model_name, Nsamp, Niters, true_ids[i], true_label, target_label, img_info[i], args['activation'], args['order'])
                 save_dict = {'H2_max': H2_max, 'pred': pred, 'g_x0': g_x0, 'id': true_ids[i], 'true_label': true_label, 'target_label': target_label, 'info':img_info[i], 'args': args, 'path': mat_path, 'g_x0_grad_2_norm': g_x0_grad_2_norm}
                 sio.savemat(mat_path, save_dict)
                 print('saved to', mat_path)

@@ -98,8 +98,8 @@ if __name__ == "__main__":
             save_dict['U'+str(i+1)] = weight_Ui
             save_dict['bias_U'+str(i+1)] = bias_Ui
 
-        save_name = args.model + "_" + str(nlayers) + "layers"
-        print('saving to {}.mat with matrices {}'.format(save_name, save_dict.keys()))
+        save_name = args.model + "_" + str(nlayers) + "layers.mat"
+        print('saving to {} with matrices {}'.format(save_name, save_dict.keys()))
         # results saved to mnist.mat or cifar.mat
         sio.savemat(save_name, save_dict)
 
