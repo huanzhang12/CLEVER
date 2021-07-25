@@ -113,7 +113,7 @@ This path can be changed in `setup_imagenet.py`.
 ```
 cd ..
 mkdir imagenetdata && cd imagenetdata
-wget http://jaina.cs.ucdavis.edu/datasets/adv/imagenet/img.tar.gz
+wget http://download.huan-zhang.com/datasets/adv/img.tar.gz
 tar zxf img.tar.gz
 cd ../CLEVER
 ```
